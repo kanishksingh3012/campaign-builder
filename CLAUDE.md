@@ -21,7 +21,7 @@ Out: auth, backend, payments, real data, file upload (creatives are picked from 
 ## Information architecture
 
 ```
-QuickCart Ads
+Endcap
 ├── Overview            account health, spend, alerts, quick actions
 ├── Campaigns           list, filters, bulk actions
 │   ├── Create          5-step goal-based wizard
@@ -75,8 +75,8 @@ filters under the title, table or cards below. Same pattern on every page (IA co
 
 ```
 ┌────────────┬──────────────────────────────────────────────────────────────┐
-│ QuickCart  │ Overview                               [ + Create campaign ] │
-│ Ads        │ Last 7 days ▾                                                │
+│ Endcap     │ Overview                               [ + Create campaign ] │
+│            │ Last 7 days ▾                                                │
 │            ├──────────────────────────────────────────────────────────────┤
 │ ▸ Overview │ ┌─ Spend ──┐ ┌─ Sales ──┐ ┌─ ROAS ───┐ ┌─ New customers ─┐    │
 │   Campaigns│ │ ₹4,82,000│ │₹19,10,000│ │  3.96    │ │   2,340         │    │
@@ -354,6 +354,7 @@ Estimate: stages 1–6 about 4–5 hours of build and review; 7–8 another 1–
 - `docs/` holds private study notes and is git-ignored.
 - Shopper preview organic results use real product names, pack sizes and prices from a one-time catalogue snapshot (`src/data/catalogueSnapshot.ts`, 14 Oct 2026, first ten non-promoted results per search). No product photos and no live calls: every card, sponsored or organic, shows the same drawn pack. Real brand names are allowed there only; sponsored ads stay fictional. Organic relevance values are illustrative. The page footer says so and states there is no affiliation.
 - Public sharing as a learning playground: `/learn` (`src/pages/Learn.tsx`) holds the exercises, glossary and worked numbers, computed from the same data and lib functions so they can't drift. A dismissible banner on Overview points to it. Below 1024px the app is replaced by a "open on a laptop" note with a "Continue anyway" button (still no mobile layout). `/preview?q=<scenario id>` opens a given search.
+- Branding: favicon (`public/favicon.svg`) is the Endcap mark; `public/og.png` (1200×627) is the link-preview image, referenced from `index.html` through `VITE_SITE_URL` in `.env`, which must be set to the deployed address for LinkedIn previews to work.
 - Deploy is the user's to do. `vercel.json` and `public/_redirects` both rewrite deep links to `index.html`.
 
 ## Commands
