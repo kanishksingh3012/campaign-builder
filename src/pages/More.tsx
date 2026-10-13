@@ -80,7 +80,7 @@ export function Reports() {
   const goal = GOALS[goalId]
   const rows = campaigns.filter((c) => c.goal === goalId && c.spent > 0).map((campaign) => ({ campaign, perf: performance(campaign) }))
   const unit = goalId === 'awareness' ? 1000 : 1
-  const costLabel = goalId === 'awareness' ? 'Cost per 1,000 reached' : `Cost per ${goalId === 'new_customers' ? 'new customer' : 'returning customer'}`
+  const costLabel = goalId === 'awareness' ? 'Cost per 1,000 reached' : `Cost per ${goalId === 'new_customers' ? 'new customer' : goalId === 'win_back' ? 'returning customer' : 'order'}`
 
   function exportCsv() {
     const header = ['Campaign', 'Status', 'Spend', 'Impressions', 'Clicks', 'Orders', goal.headlineMetric, costLabel, 'Sales', 'ROAS']
@@ -108,7 +108,7 @@ export function Reports() {
       <Tabs selectedKey={goalId} onSelectionChange={(key) => setGoalId(key as GoalId)} className="mb-4">
         <Tabs.ListContainer>
           <Tabs.List aria-label="Goal">
-            {GOAL_LIST.map((g) => (
+            {[...GOAL_LIST, GOALS.custom].map((g) => (
               <Tabs.Tab key={g.id} id={g.id} className="whitespace-nowrap">
                 {g.name}
                 <Tabs.Indicator />

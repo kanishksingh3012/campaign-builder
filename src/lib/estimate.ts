@@ -1,4 +1,5 @@
-import { CITIES, FORMATS, GOALS } from '../data/goals'
+import { FORMATS } from '../data/goals'
+import { audienceSize, bundleOf } from './bundle'
 import type { Draft, FormatId } from './types'
 
 // Illustrative forecasting: enough to make budget changes feel real, not a real model.
@@ -24,18 +25,14 @@ export interface Estimate {
   coverage: number
 }
 
-export function audienceSize(draft: Pick<Draft, 'goal' | 'cityIds'>): number {
-  if (!draft.goal) return 0
-  const shoppers = CITIES.filter((city) => draft.cityIds.includes(city.id)).reduce((sum, city) => sum + city.shoppers, 0)
-  return shoppers * GOALS[draft.goal].audienceShare
-}
+export { audienceSize }
 
-export function estimate(draft: Pick<Draft, 'goal' | 'cityIds' | 'budget' | 'split'>): Estimate | null {
+export function estimate(draft: Pick<Draft, 'goal' | 'custom' | 'cityIds' | 'budget' | 'split'>): Estimate | null {
   if (!draft.goal || draft.budget <= 0) return null
   let impressions = 0
   let clicks = 0
   let orders = 0
-  for (const item of GOALS[draft.goal].bundle) {
+  for (const item of bundleOf(draft)) {
     const format = FORMATS[item.format]
     const rupees = (draft.budget * (draft.split[item.format] ?? 0)) / 100
     const formatClicks = format.pricing === 'CPC' ? rupees / format.avgCost : (rupees / format.avgCost) * 1000 * format.ctr

@@ -1,6 +1,7 @@
 import { TODAY } from '../data/campaigns'
 import { AUTO_KEYWORDS } from '../data/catalogue'
-import { FORMATS, GOALS } from '../data/goals'
+import { FORMATS } from '../data/goals'
+import { bundleOf } from './bundle'
 import { ORDER_RATE } from './estimate'
 import { daysBetween } from './format'
 import type { Campaign, FormatId } from './types'
@@ -13,7 +14,7 @@ const CART_TO_ORDER = 0.55
 /** Average rupees of the brand's products in an order that an ad led to. */
 const SALES_PER_ORDER = 165
 /** Share of orders that count toward each goal's headline metric. */
-const HEADLINE_SHARE = { awareness: 0, new_customers: 0.82, win_back: 0.74 } as const
+const HEADLINE_SHARE = { awareness: 0, new_customers: 0.82, win_back: 0.74, custom: 1 } as const
 /** Impressions a reached shopper sees on average. */
 const FREQUENCY = 3
 
@@ -39,7 +40,7 @@ export interface Performance {
 }
 
 export function performance(campaign: Campaign): Performance {
-  const byFormat = GOALS[campaign.goal].bundle.map((item) => {
+  const byFormat = bundleOf(campaign).map((item) => {
     const format = FORMATS[item.format]
     const spend = (campaign.spent * (campaign.split[item.format] ?? item.share)) / 100
     const clicks = format.pricing === 'CPC' ? spend / format.avgCost : (spend / format.avgCost) * 1000 * format.ctr

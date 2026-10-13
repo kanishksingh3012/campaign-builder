@@ -1,6 +1,6 @@
 # Endcap: a brand ads platform (interview prototype)
 
-Status: all pages built (overview, campaigns, wizard, detail, creatives, reports, budget, shopper preview). Remaining: polish, platform name, deploy.
+Status: brand view, custom (format-first) builder and internal ops/sales view all built. Remaining: deploy (on hold until the user says so), polish.
 
 ## Why this exists
 
@@ -338,7 +338,9 @@ Estimate: stages 1–6 about 4–5 hours of build and review; 7–8 another 1–
 ## Decisions
 
 - UI library: HeroUI v3. Look: sleek, clean, rounded, dense enough for many elements per screen.
-- Custom (format-first) campaign path: visible stub only.
+- Custom (format-first) campaigns: built as a single-page builder (`src/wizard/CustomBuilder.tsx`); goal `custom`, formats/audiences/keywords/bids in `campaign.custom`. Always read a campaign's formats through `bundleOf()` in `src/lib/bundle.ts`.
+- Combined audiences: custom campaigns only (union, capped at everyone). Goal-based audiences stay locked.
+- Internal view (ops and sales): same shell, switched by the Brand/Internal control in the sidebar. Pages in `src/pages/Internal.tsx`: review queue, accounts, inventory. In the internal view submissions wait for manual review; in the brand view they auto-approve after a few seconds.
 - Repo: public on GitHub. Demo: deploy to a public URL at the end.
 - Platform name: Endcap (the paid display at the end of a store aisle). Set once in `APP_NAME` in `src/data/catalogue.ts`.
 - Commit after each stage and push.

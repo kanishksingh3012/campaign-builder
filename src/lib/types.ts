@@ -1,4 +1,25 @@
-export type GoalId = 'awareness' | 'new_customers' | 'win_back'
+export type GoalId = 'awareness' | 'new_customers' | 'win_back' | 'custom'
+
+export type AudienceId = 'all' | 'never_bought' | 'lapsed' | 'current'
+
+export interface Audience {
+  id: AudienceId
+  name: string
+  description: string
+  /** Share of a city's shoppers in this audience. Simulated. */
+  share: number
+}
+
+/** What the advertiser sets by hand in a custom (format-first) campaign. */
+export interface CustomSetup {
+  formats: FormatId[]
+  /** One or more audiences; reach is their union. */
+  audiences: AudienceId[]
+  /** Max rupees per click (CPC formats) or per 1,000 views (CPM formats). */
+  bids: Partial<Record<FormatId, number>>
+  keywords: string[]
+  match: 'exact' | 'broad'
+}
 
 export type FormatId =
   | 'home_banner'
@@ -98,6 +119,12 @@ export interface Campaign {
   endDate: string
   pacing: Pacing
   creativeId?: string
+  /** Present only on custom campaigns (goal 'custom'). */
+  custom?: CustomSetup
+  /** Why review turned the campaign down, when it is not about the creative. */
+  rejectionReason?: string
+  /** Set when an account manager created the campaign for the brand. */
+  onBehalf?: boolean
   spent: number
   activity: ActivityEntry[]
 }

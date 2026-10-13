@@ -1,4 +1,4 @@
-import type { City, Format, FormatId, Goal, GoalId } from '../lib/types'
+import type { Audience, City, Format, FormatId, Goal, GoalId } from '../lib/types'
 
 // All costs, rates and audience sizes here are illustrative, not real platform data.
 
@@ -58,8 +58,21 @@ export const GOALS: Record<GoalId, Goal> = {
       { format: 'cart_addon', reason: 'A last reminder at the moment they are about to pay.', floor: 15000, share: 40 },
     ],
   },
+  custom: {
+    id: 'custom',
+    name: 'Custom',
+    promise: 'Pick formats, audience, keywords and bids yourself',
+    judgedOn: 'Orders',
+    headlineMetric: 'Orders',
+    minBudget: 25000,
+    minDays: 3,
+    audience: 'Chosen by you',
+    audienceShare: 1,
+    bundle: [],
+  },
 }
 
+/** Goal-based options shown in the wizard. Custom campaigns have their own builder. */
 export const GOAL_LIST: Goal[] = [GOALS.awareness, GOALS.new_customers, GOALS.win_back]
 
 export const CITIES: City[] = [
@@ -70,3 +83,23 @@ export const CITIES: City[] = [
   { id: 'pun', name: 'Pune', shoppers: 550000 },
   { id: 'che', name: 'Chennai', shoppers: 600000 },
 ]
+
+export const AUDIENCES: Audience[] = [
+  { id: 'all', name: 'All shoppers', description: 'Everyone in your cities', share: 1 },
+  { id: 'never_bought', name: 'Never bought', description: 'No purchase of your brand in 12 months', share: 0.62 },
+  { id: 'lapsed', name: 'Lapsed buyers', description: 'Bought before, but not in the last 60 days', share: 0.09 },
+  { id: 'current', name: 'Current buyers', description: 'Bought your brand in the last 60 days', share: 0.29 },
+]
+
+/** Minimum rupees a format needs when the advertiser picks formats by hand. */
+export const CUSTOM_FLOOR: Record<FormatId, number> = {
+  home_banner: 40000,
+  search_banner: 20000,
+  category_boost: 10000,
+  search_ads: 10000,
+  buy_again: 10000,
+  cart_addon: 10000,
+}
+
+/** Lowest bid the auction accepts, as a share of the format's average cost. */
+export const BID_FLOOR_RATIO = 0.4

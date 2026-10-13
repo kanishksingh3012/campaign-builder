@@ -74,6 +74,17 @@ export const SEED_CAMPAIGNS: Campaign[] = [
     activity: [{ date: '2026-10-11', text: 'Draft saved' }],
   },
   {
+    id: 'cmp10', name: 'Chips keyword push', goal: 'custom', status: 'live',
+    productIds: ['p1', 'p2', 'p5'], pausedProductIds: [], cityIds: ['del'], negativeKeywords: [],
+    budget: 40000, split: { search_ads: 70, cart_addon: 30 },
+    startDate: '2026-10-09', endDate: '2026-10-22', pacing: 'even', spent: 14300,
+    custom: { formats: ['search_ads', 'cart_addon'], audiences: ['never_bought', 'lapsed'], bids: { search_ads: 8, cart_addon: 8 }, keywords: ['chips', 'masala chips', 'salted chips', 'wafers'], match: 'exact' },
+    activity: [
+      { date: '2026-10-08', text: 'Campaign created' },
+      { date: '2026-10-09', text: 'Went live' },
+    ],
+  },
+  {
     id: 'cmp8', name: 'Monsoon munchies', goal: 'win_back', status: 'ended',
     productIds: ['p1', 'p2', 'p5'], pausedProductIds: [], cityIds: ['blr', 'mum', 'pun'], negativeKeywords: [],
     budget: 80000, split: { buy_again: 60, cart_addon: 40 },

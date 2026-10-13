@@ -32,7 +32,9 @@ export function alertFor(campaign: Campaign): CampaignAlert | null {
     return { ...base, severity: 'blocker', message: 'Out of budget before its end date', action: 'Add budget' }
   }
   if (campaign.status === 'rejected') {
-    return { ...base, severity: 'blocker', message: 'Creative rejected in review', action: 'Fix creative' }
+    return campaign.rejectionReason
+      ? { ...base, severity: 'blocker', message: `Rejected in review: ${campaign.rejectionReason}`, action: 'Edit and resubmit' }
+      : { ...base, severity: 'blocker', message: 'Creative rejected in review', action: 'Fix creative' }
   }
   if (campaign.status === 'live') {
     const missing = outOfStock(campaign)

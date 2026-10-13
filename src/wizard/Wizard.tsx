@@ -3,7 +3,7 @@ import { AlertTriangle, ArrowLeft, Check, Copy, OctagonAlert } from 'lucide-reac
 import { useMemo, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
 import { TODAY } from '../data/campaigns'
-import { PRODUCTS } from '../data/catalogue'
+import { BRAND, PRODUCTS } from '../data/catalogue'
 import { FORMATS, GOALS } from '../data/goals'
 import { audienceSize } from '../lib/estimate'
 import { daysBetween, inr, range } from '../lib/format'
@@ -22,7 +22,7 @@ const STEPS: { id: WizardStep; label: string }[] = [
 
 const DEFAULT_LENGTH_DAYS = 14
 
-function blankDraft(): Draft {
+export function blankDraft(): Draft {
   const start = addDays(TODAY, 1)
   return {
     id: `cmp-${Date.now()}`,
@@ -40,7 +40,7 @@ function blankDraft(): Draft {
 }
 
 /** A copy keeps what describes the campaign and resets what is tied to a moment in time. */
-function duplicate(source: Campaign): Draft {
+export function duplicate(source: Campaign): Draft {
   const blank = blankDraft()
   return {
     ...blank,
@@ -52,6 +52,7 @@ function duplicate(source: Campaign): Draft {
     split: source.split,
     pacing: source.pacing,
     creativeId: source.creativeId,
+    custom: source.custom,
     budget: GOALS[source.goal].minBudget,
     duplicatedFrom: source.name,
   }
@@ -61,7 +62,8 @@ export function Wizard() {
   const { id } = useParams()
   const [params] = useSearchParams()
   const navigate = useNavigate()
-  const { campaigns, creatives, validationContext, dispatch, submit } = useStore()
+  const { campaigns, creatives, validationContext, dispatch, submit, role } = useStore()
+  const home = role === 'internal' ? '/internal/review' : '/campaigns'
 
   const editing = campaigns.find((c) => c.id === id)
   const source = campaigns.find((c) => c.id === params.get('from'))
@@ -88,8 +90,10 @@ export function Wizard() {
       goal: draft.goal!,
       name: draft.name.trim() || `${goal!.name} campaign`,
       status,
+      rejectionReason: undefined,
+      onBehalf: editing?.onBehalf ?? role === 'internal',
       spent: editing?.spent ?? 0,
-      activity: [...(editing?.activity ?? []), { date: TODAY, text: note }],
+      activity: [...(editing?.activity ?? []), { date: TODAY, text: role === 'internal' ? `${note} by account manager` : note }],
     }
   }
 
@@ -101,7 +105,7 @@ export function Wizard() {
   function finish() {
     if (isLiveEdit) dispatch({ type: 'upsert', campaign: toCampaign(editing.status, 'Edited by you') })
     else submit(toCampaign('in_review', 'Submitted for review'))
-    navigate('/campaigns')
+    navigate(home)
   }
 
   const stepProps = { draft, issues, update: (apply: (d: Draft) => Draft) => setDraft(apply) }
@@ -127,6 +131,12 @@ export function Wizard() {
           </Button>
         )}
       </header>
+
+      {role === 'internal' && (
+        <p className="mb-4 rounded-xl bg-default px-4 py-2.5 text-sm">
+          You're creating this on behalf of <strong className="font-semibold">{BRAND}</strong>. They'll see it marked as created by their account manager, and it goes through the same review.
+        </p>
+      )}
 
       {draft.duplicatedFrom && (
         <div className="mb-4 flex items-start gap-3 rounded-xl bg-accent-soft px-4 py-3 text-sm text-accent-soft-foreground">

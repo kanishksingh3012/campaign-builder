@@ -4,6 +4,7 @@ import { SEED_CAMPAIGNS } from '../data/campaigns'
 import { CREATIVES, PRODUCTS } from '../data/catalogue'
 import { GOAL_LIST } from '../data/goals'
 import { rankAds, runAuction } from './auction'
+import { audienceSize, bundleOf } from './bundle'
 import { estimate } from './estimate'
 import { count, inr } from './format'
 import type { Draft } from './types'
@@ -154,6 +155,33 @@ describe('validate', () => {
     void status; void spent; void activity
     const codes = validate({ ...rest, goal }, ctx).map((i) => i.code)
     expect(codes).toEqual(expect.arrayContaining(['below_min_budget', 'split_total', 'short_schedule']))
+  })
+})
+
+describe('custom campaigns', () => {
+  const custom: Draft = {
+    ...validDraft, goal: 'custom', budget: 40000, split: { search_ads: 50, cart_addon: 50 },
+    custom: { formats: ['search_ads', 'cart_addon'], audiences: ['never_bought', 'lapsed'], bids: { search_ads: 7, cart_addon: 8 }, keywords: ['chips'], match: 'exact' },
+  }
+
+  it('uses the hand-picked formats as the bundle', () => {
+    expect(bundleOf(custom).map((item) => item.format)).toEqual(['search_ads', 'cart_addon'])
+    expect(validate(custom, ctx)).toEqual([])
+  })
+
+  it('combines audiences as a union, capped at everyone', () => {
+    const blr = 1400000
+    expect(audienceSize(custom)).toBeCloseTo(blr * 0.71)
+    expect(audienceSize({ ...custom, custom: { ...custom.custom!, audiences: ['never_bought', 'lapsed', 'current'] } })).toBeCloseTo(blr)
+    expect(audienceSize({ ...custom, custom: { ...custom.custom!, audiences: ['all', 'lapsed'] } })).toBe(blr)
+  })
+
+  it('blocks a bid below the auction floor and search formats with no keywords', () => {
+    const broken = { ...custom, custom: { ...custom.custom!, bids: { search_ads: 1, cart_addon: 8 }, keywords: [] } }
+    const codes = validate(broken, ctx).map((i) => i.code)
+    expect(codes).toEqual(expect.arrayContaining(['bid_below_floor:search_ads', 'no_keywords']))
+    expect(fix(broken, 'bid_below_floor:search_ads').fixed.custom!.bids.search_ads).toBe(7)
+    expect(fix(broken, 'no_keywords').fixed.custom!.keywords.length).toBeGreaterThan(0)
   })
 })
 

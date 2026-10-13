@@ -1,8 +1,10 @@
 import { Button, Checkbox, Chip, Input, Slider } from '@heroui/react'
 import { Check, Lock, X } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
+import { Link } from 'react-router'
 import { AUTO_KEYWORDS, BRAND, PRODUCTS } from '../data/catalogue'
 import { CITIES, FORMATS, GOAL_LIST, GOALS } from '../data/goals'
+import { bundleOf } from '../lib/bundle'
 import { audienceSize, estimate } from '../lib/estimate'
 import { count, daysBetween, inr, range } from '../lib/format'
 import type { Creative, Draft, GoalId, Issue, WizardStep } from '../lib/types'
@@ -45,14 +47,13 @@ export function chooseGoal(draft: Draft, goalId: GoalId, creatives: Creative[]):
   return {
     ...draft,
     goal: goalId,
-    split: recommendedSplit(goalId),
+    split: recommendedSplit({ goal: goalId }),
     budget: Math.max(draft.budget, goal.minBudget),
     creativeId: needsCreative ? (draft.creativeId ?? creatives.find((c) => c.status === 'approved')?.id) : undefined,
   }
 }
 
 export function GoalStep({ draft, update, creatives }: StepProps & { creatives: Creative[] }) {
-  const [showCustomNote, setShowCustomNote] = useState(false)
   return (
     <Section title="What do you want this campaign to do?" hint="Your goal decides the ad formats, the audience and how results are judged.">
       <div role="radiogroup" aria-label="Campaign goal" className="grid grid-cols-3 gap-3">
@@ -86,16 +87,43 @@ export function GoalStep({ draft, update, creatives }: StepProps & { creatives: 
           )
         })}
       </div>
-      <div className="mt-4 text-sm text-muted">
-        Want to pick formats and bids yourself?{' '}
-        <button type="button" className="font-medium text-accent hover:underline" onClick={() => setShowCustomNote(true)}>
+      <p className="mt-4 text-sm text-muted">
+        Want to pick formats, keywords and bids yourself?{' '}
+        <Link to="/campaigns/custom/new" className="font-medium text-accent hover:underline">
           Build a custom campaign
-        </button>
-        {showCustomNote && (
-          <p className="mt-2 rounded-xl bg-default px-3 py-2">
-            Custom campaigns aren't part of this demo. In the full product this opens a format-first builder for advertisers who want manual control.
-          </p>
-        )}
+        </Link>
+      </p>
+    </Section>
+  )
+}
+
+export function CreativePicker({ draft, issues, update, creatives }: StepProps & { creatives: Creative[] }) {
+  return (
+    <Section title="Banner creative" hint="Banner formats in this bundle need one approved creative.">
+      <div className="grid grid-cols-3 gap-3">
+        {creatives.map((creative) => {
+          const selected = draft.creativeId === creative.id
+          return (
+            <button
+              key={creative.id}
+              type="button"
+              aria-pressed={selected}
+              onClick={() => update((d) => ({ ...d, creativeId: creative.id }))}
+              className={`rounded-xl border p-3 text-left text-sm transition-colors ${
+                selected ? 'border-accent bg-accent-soft' : 'border-border hover:bg-surface-secondary'
+              }`}
+            >
+              <span className="mb-2 block h-14 rounded-lg bg-default" aria-hidden />
+              <span className="block font-medium">{creative.name}</span>
+              <span className={`text-xs ${creative.status === 'rejected' ? 'text-danger' : 'text-muted'}`}>
+                {creative.status === 'approved' ? 'Approved' : creative.status === 'in_review' ? 'In review' : 'Rejected'}
+              </span>
+            </button>
+          )
+        })}
+      </div>
+      <div className="mt-3">
+        <IssueList issues={forField(issues, 'creative')} onFix={update} />
       </div>
     </Section>
   )
@@ -138,33 +166,7 @@ export function BundleStep({ draft, issues, update, creatives }: StepProps & { c
       </Section>
 
       {needsCreative && (
-        <Section title="Banner creative" hint="Banner formats in this bundle need one approved creative.">
-          <div className="grid grid-cols-3 gap-3">
-            {creatives.map((creative) => {
-              const selected = draft.creativeId === creative.id
-              return (
-                <button
-                  key={creative.id}
-                  type="button"
-                  aria-pressed={selected}
-                  onClick={() => update((d) => ({ ...d, creativeId: creative.id }))}
-                  className={`rounded-xl border p-3 text-left text-sm transition-colors ${
-                    selected ? 'border-accent bg-accent-soft' : 'border-border hover:bg-surface-secondary'
-                  }`}
-                >
-                  <span className="mb-2 block h-14 rounded-lg bg-default" aria-hidden />
-                  <span className="block font-medium">{creative.name}</span>
-                  <span className={`text-xs ${creative.status === 'rejected' ? 'text-danger' : 'text-muted'}`}>
-                    {creative.status === 'approved' ? 'Approved' : creative.status === 'in_review' ? 'In review' : 'Rejected'}
-                  </span>
-                </button>
-              )
-            })}
-          </div>
-          <div className="mt-3">
-            <IssueList issues={forField(issues, 'creative')} onFix={update} />
-          </div>
-        </Section>
+        <CreativePicker draft={draft} issues={issues} update={update} creatives={creatives} />
       )}
 
       {usesKeywords && (
@@ -220,7 +222,7 @@ export function BundleStep({ draft, issues, update, creatives }: StepProps & { c
   )
 }
 
-export function ProductsStep({ draft, issues, update }: StepProps) {
+export function ProductsStep({ draft, issues, update, audiencePicker }: StepProps & { audiencePicker?: ReactNode }) {
   const goal = GOALS[draft.goal!]
   const size = audienceSize(draft)
   const toggle = <T,>(list: T[], value: T) => (list.includes(value) ? list.filter((v) => v !== value) : [...list, value])
@@ -272,8 +274,11 @@ export function ProductsStep({ draft, issues, update }: StepProps) {
         </div>
       </Section>
 
-      <Section title="Audience" aside={<LockedTag />}>
-        <p className="text-sm">{goal.audience}</p>
+      <Section title="Audience" aside={audiencePicker ? undefined : <LockedTag />}>
+        {audiencePicker ?? <p className="text-sm">{goal.audience}</p>}
+        <div className="mt-3 empty:hidden">
+          <IssueList issues={forField(issues, 'audience')} onFix={update} />
+        </div>
         <p className="mt-3 text-xs text-muted">Estimated size (simulated)</p>
         <p className="tabular text-lg font-semibold">{size ? range(size * 0.92, size * 1.08) : '—'}</p>
         <p className="mt-4 text-sm font-medium">Cities</p>
@@ -305,6 +310,7 @@ export function ProductsStep({ draft, issues, update }: StepProps) {
 
 export function BudgetStep({ draft, issues, update, available }: StepProps & { available: number }) {
   const goal = GOALS[draft.goal!]
+  const bundle = bundleOf(draft)
   const total = splitTotal(draft)
   const forecast = estimate(draft)
   const days = draft.startDate && draft.endDate && draft.endDate >= draft.startDate ? daysBetween(draft.startDate, draft.endDate) : 0
@@ -341,7 +347,7 @@ export function BudgetStep({ draft, issues, update, available }: StepProps & { a
         }
       >
         <div className="flex flex-col gap-4">
-          {goal.bundle.map((item) => {
+          {bundle.map((item) => {
             const share = draft.split[item.format] ?? 0
             return (
               <div key={item.format}>
@@ -373,8 +379,8 @@ export function BudgetStep({ draft, issues, update, available }: StepProps & { a
         <div className="mt-4 flex flex-col gap-2">
           <IssueList issues={issues.filter((i) => i.field === 'split')} onFix={update} />
           {total === 100 && (
-            <Button size="sm" variant="ghost" className="self-start" onPress={() => update((d) => ({ ...d, split: recommendedSplit(goal.id) }))}>
-              Use recommended split ({goal.bundle.map((item) => item.share).join(' / ')})
+            <Button size="sm" variant="ghost" className="self-start" onPress={() => update((d) => ({ ...d, split: recommendedSplit(d) }))}>
+              Use recommended split ({bundle.map((item) => item.share).join(' / ')})
             </Button>
           )}
         </div>

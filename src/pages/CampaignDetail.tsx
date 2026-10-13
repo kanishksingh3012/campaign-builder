@@ -4,8 +4,9 @@ import { Link, useNavigate, useParams } from 'react-router'
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { TODAY } from '../data/campaigns'
 import { CREATIVES, PRODUCTS } from '../data/catalogue'
-import { CITIES, FORMATS, GOALS } from '../data/goals'
+import { AUDIENCES, CITIES, FORMATS, GOALS } from '../data/goals'
 import { alertFor } from '../lib/alerts'
+import { bundleOf } from '../lib/bundle'
 import { count, inr, percent } from '../lib/format'
 import { dailySpend, keywordPerformance, performance, timeElapsed } from '../lib/simulate'
 import type { Campaign } from '../lib/types'
@@ -41,7 +42,7 @@ export function CampaignDetail() {
   const elapsed = timeElapsed(campaign)
   const pacing = campaign.spent === 0 ? 'Not started' : used > elapsed + 0.15 ? 'Spending fast' : used < elapsed - 0.15 ? 'Spending slowly' : 'On track'
   const keywords = keywordPerformance(campaign)
-  const usesSearch = goal.bundle.some((item) => item.format === 'search_ads' || item.format === 'search_banner')
+  const usesSearch = bundleOf(campaign).some((item) => item.format === 'search_ads' || item.format === 'search_banner')
   const tabs = ['Performance', 'Bundle', ...(usesSearch ? ['Keywords'] : []), 'Setup', 'Activity']
   const exclude = (keyword: string) =>
     dispatch({
@@ -86,7 +87,7 @@ export function CampaignDetail() {
               Edit
             </Button>
           )}
-          <Button size="sm" variant="secondary" onPress={() => navigate(`/campaigns/new?from=${campaign.id}`)}>
+          <Button size="sm" variant="secondary" onPress={() => navigate(`/campaigns/${campaign.goal === 'custom' ? 'custom/' : ''}new?from=${campaign.id}`)}>
             Duplicate
           </Button>
         </div>
@@ -103,7 +104,7 @@ export function CampaignDetail() {
           <span className="flex-1">
             {alert.message}.{' '}
             {campaign.status === 'out_of_budget' && 'Ads have stopped showing. Add budget to resume straight away.'}
-            {campaign.status === 'rejected' && 'Swap the creative for an approved one and resubmit.'}
+            {campaign.status === 'rejected' && (campaign.rejectionReason ? 'Edit the campaign and resubmit.' : 'Swap the creative for an approved one and resubmit.')}
             {campaign.status === 'live' && 'Their ads are still running and lead to an unavailable product.'}
           </span>
           {campaign.status === 'out_of_budget' ? (
@@ -137,7 +138,7 @@ export function CampaignDetail() {
             <>
               <div className="grid grid-cols-4 gap-4">
                 <Stat label={goal.headlineMetric} value={count(perf.headline)} note={`Judged on ${goal.judgedOn.toLowerCase()}`} />
-                <Stat label={`Cost per ${goal.id === 'awareness' ? '1,000 reached' : goal.id === 'new_customers' ? 'new customer' : 'returning customer'}`} value={perf.headline ? inr((perf.spend / perf.headline) * (goal.id === 'awareness' ? 1000 : 1)) : '—'} />
+                <Stat label={`Cost per ${goal.id === 'awareness' ? '1,000 reached' : goal.id === 'new_customers' ? 'new customer' : goal.id === 'win_back' ? 'returning customer' : 'order'}`} value={perf.headline ? inr((perf.spend / perf.headline) * (goal.id === 'awareness' ? 1000 : 1)) : '—'} />
                 <Stat label="Sales from ads" value={inr(perf.sales)} />
                 <Stat label="Return on ad spend" value={`${perf.roas.toFixed(2)}×`} />
               </div>
@@ -254,7 +255,7 @@ export function CampaignDetail() {
           <Panel title="Setup">
             <dl className="grid grid-cols-[9rem_1fr] gap-x-4 gap-y-3 text-sm">
               <dt className="text-muted">Audience</dt>
-              <dd>{goal.audience}</dd>
+              <dd>{campaign.custom ? AUDIENCES.filter((a) => campaign.custom!.audiences.includes(a.id)).map((a) => a.name).join(' + ') : goal.audience}</dd>
               <dt className="text-muted">Cities</dt>
               <dd>{CITIES.filter((c) => campaign.cityIds.includes(c.id)).map((c) => c.name).join(', ')}</dd>
               <dt className="text-muted">Products</dt>

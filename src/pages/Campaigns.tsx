@@ -57,7 +57,7 @@ export function Campaigns() {
     const ids = [campaign.id]
     if (action === 'view') navigate(`/campaigns/${campaign.id}`)
     if (action === 'edit') navigate(`/campaigns/${campaign.id}/edit`)
-    if (action === 'duplicate') navigate(`/campaigns/new?from=${campaign.id}`)
+    if (action === 'duplicate') navigate(`/campaigns/${campaign.goal === 'custom' ? 'custom/' : ''}new?from=${campaign.id}`)
     if (action === 'pause') dispatch({ type: 'set_status', ids, status: 'paused', note: 'Paused by you' })
     if (action === 'resume') dispatch({ type: 'set_status', ids, status: 'live', note: 'Resumed by you' })
     if (action === 'end') dispatch({ type: 'set_status', ids, status: 'ended', note: 'Ended early by you' })
@@ -125,6 +125,7 @@ export function Campaigns() {
                     >
                       {campaign.name}
                     </Link>
+                    {campaign.onBehalf && <span className="ml-2 text-xs text-muted">by your account manager</span>}
                     {alert && (
                       <p className={`mt-0.5 flex items-center gap-1 text-xs ${alert.severity === 'blocker' ? 'text-danger' : 'text-warning'}`}>
                         {alert.severity === 'blocker' ? <OctagonAlert size={12} /> : <AlertTriangle size={12} />}
