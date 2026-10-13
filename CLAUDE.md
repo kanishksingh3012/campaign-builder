@@ -307,6 +307,7 @@ src/
 - Top bar owns the global Create menu, the Brand/Internal switch and the balance. Pages don't repeat a primary Create button.
 - Motion is purposeful only: `.pressable` on selectable cards, `.bar-fill` on bars, `.rise-in` between wizard steps, `AnimatedNumber` where a control changes a figure, a brief "Fixed" note when an issue is resolved. Respect reduced motion.
 - Shared pieces in `src/shell/ui.tsx`: Panel, Stat, GoalTag, Thumb, BannerArt, Bar, AnimatedNumber.
+- Banner creatives are SVG drawings in `src/shell/creatives.tsx`, keyed by creative name; `BannerArt` falls back to a colour block for names without artwork. "New flavours launch" is text-heavy on purpose, since it is the one review rejects.
 - Sponsored cards match organic cards except a clear "Sponsored" label.
 - Sentence case. Indian number formatting (₹1,00,000; lakh for large reach numbers). Font: Inter (user's choice).
 - Every simulated number is labelled "simulated" once per page.

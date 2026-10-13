@@ -19,6 +19,8 @@
   --radius: 0.625rem;
 
   /* Shell */
+  /* Behind product photos: stays light in both themes so packshots read. */
+  --packshot: oklch(0.985 0.004 80);
   --ink: oklch(0.205 0.022 45);
   --ink-raised: oklch(0.27 0.028 45);
   --ink-line: oklch(0.33 0.03 45);
@@ -66,6 +68,7 @@
 }
 
 @theme inline {
+  --color-packshot: var(--packshot);
   --color-ink: var(--ink);
   --color-ink-raised: var(--ink-raised);
   --color-ink-line: var(--ink-line);

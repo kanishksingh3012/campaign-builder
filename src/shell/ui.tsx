@@ -5,6 +5,7 @@ import { GOALS } from '../data/goals'
 import { inr } from '../lib/format'
 import type { Campaign, GoalId } from '../lib/types'
 import { useStore } from '../state/store'
+import { CreativeArt, hasCreativeArt } from './creatives'
 
 export function Panel({ title, hint, aside, children, className = '' }: { title?: string; hint?: string; aside?: ReactNode; children: ReactNode; className?: string }) {
   return (
@@ -74,8 +75,9 @@ export function Thumb({ seed, className = 'h-16' }: { seed: string; className?: 
   )
 }
 
-/** A stand-in banner creative: a flat colour block with the headline, hue taken from the name. */
+/** A creative's banner: its drawn artwork when it has one, otherwise a flat colour block with the headline. */
 export function BannerArt({ name, className = 'h-28' }: { name: string; className?: string }) {
+  if (hasCreativeArt(name)) return <CreativeArt name={name} className={className} />
   let hue = 0
   for (const char of name) hue = (hue * 31 + char.charCodeAt(0)) % 360
   return (

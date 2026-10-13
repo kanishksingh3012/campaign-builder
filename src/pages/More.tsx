@@ -46,7 +46,7 @@ export function Creatives() {
           const status = CREATIVE_STATUS[creative.status]
           return (
             <li key={creative.id} className="flex flex-col rounded-2xl border border-border bg-surface p-4 text-sm shadow-card">
-              <BannerArt name={creative.name} className="mb-3 h-28" />
+              <BannerArt name={creative.name} className="mb-3 aspect-[30/11]" />
               <div className="flex items-start justify-between gap-2">
                 <span className="font-medium">{creative.name}</span>
                 <Chip size="sm" variant="soft" color={status.color} className="whitespace-nowrap">

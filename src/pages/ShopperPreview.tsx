@@ -51,12 +51,13 @@ export function ShopperPreview() {
                     item.kind === 'sponsored' ? `pop-in ${highlight ? 'border-accent bg-accent-soft' : 'border-border'}` : `border-border ${highlight ? 'opacity-55' : ''}`
                   }`}
                 >
-                  <Thumb seed={card.brand} className="mb-2 h-16" />
+                  {item.kind === 'organic' && item.result.image ? <Packshot src={item.result.image} seed={card.brand} /> : <Thumb seed={card.brand} className="mb-2 h-20" />}
                   <span className="flex min-h-5 items-center justify-between gap-1">
                     <span className="truncate text-xs text-muted">{card.brand}</span>
                     {item.kind === 'sponsored' && <WhyThisAd ad={item.ad} eligible={result.eligible.length} />}
                   </span>
                   <span className="line-clamp-2 min-h-10 font-medium leading-5">{card.product}</span>
+                  <span className="min-h-4 text-xs text-muted">{card.pack}</span>
                   <span className="tabular mt-1 flex items-center justify-between">
                     {inr(card.price)}
                     <span className="rounded-lg border border-accent px-2.5 py-0.5 text-xs font-medium text-accent">Add</span>
@@ -148,7 +149,7 @@ export function ShopperPreview() {
                   return (
                     <tr key={ad.id} className="border-b border-border last:border-0">
                       <td className="py-2 pr-3">
-                        <span className="font-medium">{ad.product}</span> <span className="text-muted">{ad.brand}</span>
+                        <span className="font-medium">{ad.product}</span> <span className="text-muted">{[ad.pack, ad.brand].filter(Boolean).join(' · ')}</span>
                       </td>
                       <td className="tabular px-3 py-2 text-right">{inr(ad.bid)}</td>
                       <td className="tabular px-3 py-2 text-right">{percent(ad.pCtr, 1)}</td>
@@ -166,7 +167,7 @@ export function ShopperPreview() {
                 {result.filtered.map((ad) => (
                   <tr key={ad.id} className="border-b border-border text-muted last:border-0">
                     <td className="py-2 pr-3">
-                      {ad.product} <span>{ad.brand}</span>
+                      {ad.product} <span>{[ad.pack, ad.brand].filter(Boolean).join(' · ')}</span>
                     </td>
                     <td className="tabular px-3 py-2 text-right">{inr(ad.bid)}</td>
                     <td className="tabular px-3 py-2 text-right">{percent(ad.pCtr, 1)}</td>
@@ -188,6 +189,17 @@ export function ShopperPreview() {
       <SimulatedNote />
       <p className="mt-1 text-xs text-muted">Organic results are a catalogue snapshot from {SNAPSHOT_DATE}. Sponsored ads are fictional.</p>
     </>
+  )
+}
+
+/** A real product photo; falls back to the placeholder tile if the image can't load. */
+function Packshot({ src, seed }: { src: string; seed: string }) {
+  const [failed, setFailed] = useState(false)
+  if (failed) return <Thumb seed={seed} className="mb-2 h-20" />
+  return (
+    <span className="relative mb-2 block h-20 overflow-hidden rounded-lg bg-packshot">
+      <img src={src} alt="" loading="lazy" onError={() => setFailed(true)} className="absolute inset-0 h-full w-full object-contain p-1" />
+    </span>
   )
 }
 

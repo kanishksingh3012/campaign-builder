@@ -151,6 +151,7 @@ export interface Issue {
 export interface AdCandidate {
   id: string
   product: string
+  pack?: string
   brand: string
   price: number
   /** Max rupees per click. */
@@ -164,6 +165,9 @@ export interface AdCandidate {
 export interface OrganicResult {
   id: string
   product: string
+  pack?: string
+  /** Full packshot URL, when the result comes from the catalogue snapshot. */
+  image?: string
   brand: string
   price: number
   relevance: number
