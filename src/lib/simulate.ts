@@ -1,4 +1,5 @@
 import { TODAY } from '../data/campaigns'
+import { AUTO_KEYWORDS } from '../data/catalogue'
 import { FORMATS, GOALS } from '../data/goals'
 import { ORDER_RATE } from './estimate'
 import { daysBetween } from './format'
@@ -95,4 +96,28 @@ function noise(seed: string, index: number): number {
   let hash = index + 7
   for (const char of seed) hash = (hash * 31 + char.charCodeAt(0)) % 9973
   return hash / 9973
+}
+
+export interface KeywordPerformance {
+  keyword: string
+  spend: number
+  clicks: number
+  orders: number
+}
+
+/** Search-format results split by keyword. Popular keywords get more clicks; niche ones convert better. */
+export function keywordPerformance(campaign: Campaign): KeywordPerformance[] {
+  const search = performance(campaign).byFormat.filter((row) => row.format === 'search_ads' || row.format === 'search_banner')
+  const clicks = search.reduce((sum, row) => sum + row.clicks, 0)
+  const spend = search.reduce((sum, row) => sum + row.spend, 0)
+  if (clicks === 0) return []
+  const keywords = AUTO_KEYWORDS.filter((keyword) => !campaign.negativeKeywords.includes(keyword))
+  const weights = keywords.map((_, i) => 1 / (i + 1.5))
+  const total = weights.reduce((sum, w) => sum + w, 0)
+  return keywords.map((keyword, i) => {
+    const share = weights[i] / total
+    const keywordClicks = Math.round(clicks * share)
+    const orderRate = 0.08 + 0.22 * noise(keyword, i)
+    return { keyword, spend: Math.round(spend * share), clicks: keywordClicks, orders: Math.round(keywordClicks * orderRate) }
+  })
 }

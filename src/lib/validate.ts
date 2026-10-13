@@ -1,4 +1,4 @@
-import { FORMATS, GOALS } from '../data/goals'
+import { CITIES, FORMATS, GOALS } from '../data/goals'
 import { daysBetween, inr } from './format'
 import type { Campaign, Creative, Draft, FormatId, Issue, Product } from './types'
 
@@ -8,6 +8,8 @@ export interface ValidationContext {
   campaigns: Campaign[]
   /** Rupees not yet committed to other campaigns. */
   availableBalance: number
+  /** What this campaign has already spent, when editing one that has run. */
+  alreadySpent?: number
 }
 
 export function splitTotal(draft: Pick<Draft, 'goal' | 'split'>): number {
@@ -69,8 +71,38 @@ export function validate(draft: Draft, ctx: ValidationContext): Issue[] {
     })
   }
 
+  // Audience: an awareness campaign reaches everyone, so it overlaps any other goal in the same cities and dates.
+  const sharedAudience = ctx.campaigns.find(
+    (other) =>
+      other.id !== draft.id &&
+      other.goal !== draft.goal &&
+      (other.goal === 'awareness' || draft.goal === 'awareness') &&
+      ['live', 'in_review', 'paused'].includes(other.status) &&
+      other.startDate <= draft.endDate &&
+      other.endDate >= draft.startDate &&
+      other.cityIds.some((id) => draft.cityIds.includes(id)),
+  )
+  if (sharedAudience) {
+    const shared = draft.cityIds.filter((id) => sharedAudience.cityIds.includes(id))
+    const names = CITIES.filter((city) => shared.includes(city.id)).map((city) => city.name).join(' and ')
+    issues.push({
+      code: 'audience_overlap', step: 'products', field: 'cities', severity: 'warning',
+      message: `Shoppers in ${names} will also see "${sharedAudience.name}". They count once toward reach, so results here may look lower.`,
+      fixes: shared.length < draft.cityIds.length
+        ? [{ label: `Drop ${names}`, apply: (d) => ({ ...d, cityIds: d.cityIds.filter((id) => !shared.includes(id)) }) }]
+        : [],
+    })
+  }
+
   // Budget
-  if (draft.budget < goal.minBudget) {
+  const spent = ctx.alreadySpent ?? 0
+  if (spent > 0 && draft.budget < spent) {
+    issues.push({
+      code: 'below_spent', step: 'budget', field: 'budget', severity: 'blocker',
+      message: `This campaign has already spent ${inr(spent)}. The budget can't go below that.`,
+      fixes: [{ label: `Set to ${inr(Math.max(spent, goal.minBudget))}`, apply: (d) => ({ ...d, budget: Math.max(spent, goal.minBudget) }) }],
+    })
+  } else if (draft.budget < goal.minBudget) {
     issues.push({
       code: 'below_min_budget', step: 'budget', field: 'budget', severity: 'blocker',
       message: `Minimum for ${goal.name} is ${inr(goal.minBudget)}. Below that, the bundle can't deliver enough to judge.`,

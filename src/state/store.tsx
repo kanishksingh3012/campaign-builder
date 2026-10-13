@@ -19,6 +19,7 @@ type Action =
   | { type: 'remove'; id: string }
   | { type: 'set_creative_status'; id: string; status: Creative['status'] }
   | { type: 'reset' }
+  | { type: 'clear' }
 
 const initialState: State = { campaigns: SEED_CAMPAIGNS, creatives: CREATIVES, balance: ACCOUNT_BALANCE }
 
@@ -55,11 +56,22 @@ function reducer(state: State, action: Action): State {
         ),
       }
     case 'set_creative_status':
-      return { ...state, creatives: state.creatives.map((c) => (c.id === action.id ? { ...c, status: action.status } : c)) }
+      return {
+        ...state,
+        creatives: state.creatives.map((c) => (c.id === action.id ? { ...c, status: action.status } : c)),
+        // A campaign rejected only for its creative goes live once that creative is approved.
+        campaigns: state.campaigns.map((c) =>
+          action.status === 'approved' && c.status === 'rejected' && c.creativeId === action.id
+            ? { ...c, status: 'live', activity: [...c.activity, { date: TODAY, text: 'Creative approved; campaign approved and live' }] }
+            : c,
+        ),
+      }
     case 'remove':
       return { ...state, campaigns: state.campaigns.filter((c) => c.id !== action.id) }
     case 'reset':
       return initialState
+    case 'clear':
+      return { ...initialState, campaigns: [] }
   }
 }
 
@@ -132,6 +144,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           creatives: state.creatives,
           campaigns: others,
           availableBalance: state.balance - committed(others),
+          alreadySpent: state.campaigns.find((c) => c.id === draftId)?.spent,
         }
       },
     }

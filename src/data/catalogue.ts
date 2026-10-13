@@ -1,8 +1,8 @@
 import type { Creative, Product } from '../lib/types'
 
 // Fictional brand and products.
-/** Placeholder until the platform is named. */
-export const APP_NAME = 'Ads Manager'
+
+export const APP_NAME = 'Endcap'
 export const BRAND = 'Crisp & Co'
 
 export const PRODUCTS: Product[] = [

@@ -21,6 +21,38 @@ export function Overview() {
   })
   const active = campaigns.filter((c) => ['live', 'paused', 'in_review', 'out_of_budget'].includes(c.status))
 
+  if (campaigns.length === 0) {
+    return (
+      <>
+        <PageHeader title={`Welcome, ${BRAND}`} subtitle="You have no campaigns yet. Here is how the first one works." />
+        <Panel>
+          <ol className="grid grid-cols-3 gap-6 text-sm">
+            {[
+              ['Pick a goal', 'Awareness, new customers or win back. The goal decides everything else.'],
+              ['Get a bundle', 'We choose the ad formats, audience and keywords that fit the goal. You choose products and cities.'],
+              ['Set a budget', `You have ${inr(available)} available. Each goal has a minimum so it can deliver enough to judge.`],
+            ].map(([title, text], i) => (
+              <li key={title}>
+                <span className="tabular mb-2 grid size-7 place-items-center rounded-full bg-accent-soft text-xs font-semibold text-accent-soft-foreground">{i + 1}</span>
+                <p className="font-semibold">{title}</p>
+                <p className="mt-1 text-muted">{text}</p>
+              </li>
+            ))}
+          </ol>
+          <div className="mt-6 flex items-center gap-4">
+            <Button variant="primary" onPress={() => navigate('/campaigns/new')}>
+              <Plus size={16} />
+              Create your first campaign
+            </Button>
+            <Link to="/preview" className="text-sm font-medium text-accent hover:underline">
+              See where ads appear to shoppers
+            </Link>
+          </div>
+        </Panel>
+      </>
+    )
+  }
+
   return (
     <>
       <PageHeader

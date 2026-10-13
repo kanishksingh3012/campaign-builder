@@ -135,6 +135,20 @@ describe('validate', () => {
     expect(codes).toEqual([])
   })
 
+  it('blocks a budget below what an edited campaign has already spent', () => {
+    const { fixed, codes } = fix({ ...validDraft, budget: 80000 }, 'below_spent', { ...ctx, alreadySpent: 90000 })
+    expect(fixed.budget).toBe(90000)
+    expect(codes).not.toContain('below_spent')
+  })
+
+  it('warns when an awareness campaign reaches the same cities and offers to drop them', () => {
+    const awareness = { ...SEED_CAMPAIGNS.find((c) => c.id === 'cmp6')!, startDate: '2026-11-01', endDate: '2026-11-20' }
+    const draft = { ...validDraft, cityIds: ['blr', 'mum'] }
+    const { fixed, codes } = fix(draft, 'audience_overlap', { ...ctx, campaigns: [awareness] })
+    expect(fixed.cityIds).toEqual(['blr'])
+    expect(codes).not.toContain('audience_overlap')
+  })
+
   it('flags the seeded draft with the issues the demo relies on', () => {
     const { goal, status, spent, activity, ...rest } = SEED_CAMPAIGNS.find((c) => c.id === 'cmp7')!
     void status; void spent; void activity

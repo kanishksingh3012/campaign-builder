@@ -2,11 +2,12 @@ import { Button, Chip, Tabs } from '@heroui/react'
 import { AlertTriangle, ArrowLeft, OctagonAlert } from 'lucide-react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { TODAY } from '../data/campaigns'
 import { CREATIVES, PRODUCTS } from '../data/catalogue'
 import { CITIES, FORMATS, GOALS } from '../data/goals'
 import { alertFor } from '../lib/alerts'
 import { count, inr, percent } from '../lib/format'
-import { dailySpend, performance, timeElapsed } from '../lib/simulate'
+import { dailySpend, keywordPerformance, performance, timeElapsed } from '../lib/simulate'
 import type { Campaign } from '../lib/types'
 import { PageHeader } from '../shell/Layout'
 import { StatusChip } from '../shell/StatusChip'
@@ -39,6 +40,18 @@ export function CampaignDetail() {
   const used = campaign.budget ? campaign.spent / campaign.budget : 0
   const elapsed = timeElapsed(campaign)
   const pacing = campaign.spent === 0 ? 'Not started' : used > elapsed + 0.15 ? 'Spending fast' : used < elapsed - 0.15 ? 'Spending slowly' : 'On track'
+  const keywords = keywordPerformance(campaign)
+  const usesSearch = goal.bundle.some((item) => item.format === 'search_ads' || item.format === 'search_banner')
+  const tabs = ['Performance', 'Bundle', ...(usesSearch ? ['Keywords'] : []), 'Setup', 'Activity']
+  const exclude = (keyword: string) =>
+    dispatch({
+      type: 'upsert',
+      campaign: {
+        ...campaign,
+        negativeKeywords: [...campaign.negativeKeywords, keyword],
+        activity: [...campaign.activity, { date: TODAY, text: `Stopped showing for "${keyword}"` }],
+      },
+    })
   const setStatus = (status: Campaign['status'], note: string) => dispatch({ type: 'set_status', ids: [campaign.id], status, note })
 
   return (
@@ -106,7 +119,7 @@ export function CampaignDetail() {
       <Tabs defaultSelectedKey="performance">
         <Tabs.ListContainer>
           <Tabs.List aria-label="Campaign sections">
-            {['Performance', 'Bundle', 'Setup', 'Activity'].map((label) => (
+            {tabs.map((label) => (
               <Tabs.Tab key={label} id={label.toLowerCase()}>
                 {label}
                 <Tabs.Indicator />
@@ -195,6 +208,47 @@ export function CampaignDetail() {
             </table>
           </Panel>
         </Tabs.Panel>
+
+        {usesSearch && (
+          <Tabs.Panel id="keywords" className="pt-4">
+            <Panel title="Searches your ads showed for" hint="Chosen automatically. You can't bid on them one by one, but you can stop showing for any that waste money.">
+              {keywords.length === 0 ? (
+                <p className="py-8 text-center text-sm text-muted">No search results yet.</p>
+              ) : (
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border text-left text-xs text-muted">
+                      <th className="py-2 pr-3 font-medium">Search</th>
+                      <th className="px-3 py-2 text-right font-medium">Spend</th>
+                      <th className="px-3 py-2 text-right font-medium">Clicks</th>
+                      <th className="px-3 py-2 text-right font-medium">Orders</th>
+                      <th className="px-3 py-2 text-right font-medium">Cost per order</th>
+                      <th className="py-2 pl-3">
+                        <span className="sr-only">Actions</span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="tabular">
+                    {keywords.map((row) => (
+                      <tr key={row.keyword} className="border-b border-border last:border-0">
+                        <td className="py-2 pr-3 font-medium">{row.keyword}</td>
+                        <td className="px-3 py-2 text-right">{inr(row.spend)}</td>
+                        <td className="px-3 py-2 text-right">{count(row.clicks)}</td>
+                        <td className="px-3 py-2 text-right">{count(row.orders)}</td>
+                        <td className="px-3 py-2 text-right">{row.orders ? inr(row.spend / row.orders) : '—'}</td>
+                        <td className="py-2 pl-3 text-right">
+                          <Button size="sm" variant="ghost" onPress={() => exclude(row.keyword)} aria-label={`Stop showing for ${row.keyword}`}>
+                            Stop showing
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </Panel>
+          </Tabs.Panel>
+        )}
 
         <Tabs.Panel id="setup" className="pt-4">
           <Panel title="Setup">

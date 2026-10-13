@@ -1,5 +1,5 @@
 import { Button } from '@heroui/react'
-import { BarChart3, Image, LayoutDashboard, Megaphone, RotateCcw, Smartphone, Wallet } from 'lucide-react'
+import { BarChart3, Eraser, Image, LayoutDashboard, Megaphone, RotateCcw, Smartphone, Wallet } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { NavLink } from 'react-router'
 import { APP_NAME, BRAND } from '../data/catalogue'
@@ -52,6 +52,10 @@ export function Layout({ children }: { children: ReactNode }) {
           <Button size="sm" variant="ghost" className="justify-start text-muted" onPress={() => dispatch({ type: 'reset' })}>
             <RotateCcw size={14} />
             Reset demo data
+          </Button>
+          <Button size="sm" variant="ghost" className="-mt-2 justify-start text-muted" onPress={() => dispatch({ type: 'clear' })}>
+            <Eraser size={14} />
+            Start as a new account
           </Button>
         </div>
       </aside>

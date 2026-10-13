@@ -1,4 +1,4 @@
-# QuickCart Ads: a brand ads platform (interview prototype)
+# Endcap: a brand ads platform (interview prototype)
 
 Status: all pages built (overview, campaigns, wizard, detail, creatives, reports, budget, shopper preview). Remaining: polish, platform name, deploy.
 
@@ -11,7 +11,7 @@ and the shopper is protected by visible guardrails."
 
 Framing for the demo: inspired by public objective-first tools (Instacart Ads Manager, Amazon Ads,
 Blinkit Brand Central). It must not look like a copy of any company's unreleased work.
-No real brand names, logos, or internal terms. Fictional platform: "QuickCart Ads". Fictional brand: "Crisp & Co" (snacks).
+No real brand names, logos, or internal terms. Fictional platform: "Endcap". Fictional brand: "Crisp & Co" (snacks).
 
 ## Scope
 
@@ -340,7 +340,7 @@ Estimate: stages 1–6 about 4–5 hours of build and review; 7–8 another 1–
 - UI library: HeroUI v3. Look: sleek, clean, rounded, dense enough for many elements per screen.
 - Custom (format-first) campaign path: visible stub only.
 - Repo: public on GitHub. Demo: deploy to a public URL at the end.
-- Platform name: undecided. Use the `APP_NAME` constant in `src/data/catalogue.ts`; never hard-code it.
+- Platform name: Endcap (the paid display at the end of a store aisle). Set once in `APP_NAME` in `src/data/catalogue.ts`.
 - Commit after each stage and push.
 - `docs/` holds private study notes and is git-ignored.
 
