@@ -173,6 +173,12 @@ export function Layout({ children }: { children: ReactNode }) {
           <SidebarAction icon={RotateCcw} label="Reset demo data" onPress={() => dispatch({ type: 'reset' })} />
           <SidebarAction icon={Eraser} label="Start as a new account" onPress={() => dispatch({ type: 'clear' })} />
           <p className="px-2.5 pt-2 text-xs leading-4 text-ink-muted">Learning prototype. Fictional brand, simulated numbers.</p>
+          <p className="px-2.5 pt-1 text-xs leading-4 text-ink-muted">
+            By{' '}
+            <a href="https://www.linkedin.com/in/kanishk-singh-728126211/" target="_blank" rel="noreferrer" className="font-medium text-ink-text underline-offset-2 hover:text-white hover:underline">
+              Kanishk
+            </a>
+          </p>
         </div>
       </aside>
 
