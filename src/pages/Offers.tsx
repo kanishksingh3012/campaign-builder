@@ -225,11 +225,11 @@ export function OfferBuilder() {
             <ul className="grid grid-cols-2 gap-x-6 gap-y-1">
               {PRODUCTS.map((product) => (
                 <li key={product.id} className="py-1">
-                  <Checkbox className="flex-row items-center gap-2.5" isSelected={offer.productIds.includes(product.id)} onChange={() => set({ productIds: toggle(offer.productIds, product.id) })}>
-                    <Checkbox.Control>
-                      <Checkbox.Indicator />
-                    </Checkbox.Control>
+                  <Checkbox isSelected={offer.productIds.includes(product.id)} onChange={() => set({ productIds: toggle(offer.productIds, product.id) })}>
                     <Checkbox.Content>
+                      <Checkbox.Control>
+                        <Checkbox.Indicator />
+                      </Checkbox.Control>
                       <span className="flex items-center gap-2 text-sm">
                         <span className="font-medium">{product.name}</span>
                         <span className="tabular text-muted">

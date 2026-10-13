@@ -195,3 +195,11 @@ button {
     transform: none;
   }
 }
+
+/* The library's unchecked box is nearly invisible on our surfaces; give it a visible edge. */
+[data-slot="checkbox-control"] {
+  box-shadow: inset 0 0 0 1.5px color-mix(in oklab, var(--foreground) 38%, transparent);
+}
+[data-slot="checkbox"][data-selected] [data-slot="checkbox-control"] {
+  box-shadow: none;
+}

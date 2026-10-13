@@ -9,7 +9,7 @@ import { inr, percent } from '../lib/format'
 import { totals } from '../lib/simulate'
 import type { Campaign, FormatId } from '../lib/types'
 import { PageHeader } from '../shell/Layout'
-import { Panel, SimulatedNote, Stat } from '../shell/ui'
+import { BannerArt, Panel, SimulatedNote, Stat } from '../shell/ui'
 import { useStore } from '../state/store'
 
 const CAMPAIGN_REASONS = ['a product is not eligible for ads in a selected city', 'keywords include a competitor brand name', 'budget source is not verified']
@@ -100,9 +100,7 @@ export function ReviewQueue() {
             <ul className="divide-y divide-border rounded-xl border border-border">
               {waitingCreatives.map((creative) => (
                 <li key={creative.id} className="flex items-center gap-4 px-4 py-3 text-sm">
-                  <span className="grid h-12 w-20 shrink-0 place-items-center rounded-lg bg-default text-xs text-muted" aria-hidden>
-                    Banner
-                  </span>
+                  <BannerArt name={creative.name} className="h-14 w-36 shrink-0" />
                   <span className="flex-1">
                     <span className="font-medium">{creative.name}</span>
                     <span className="block text-muted">{BRAND}</span>

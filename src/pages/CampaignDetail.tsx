@@ -170,7 +170,8 @@ export function CampaignDetail() {
                       { label: 'Clicks', value: perf.clicks },
                       { label: 'Add to cart', value: perf.addToCarts },
                       { label: 'Orders', value: perf.orders },
-                      ...(goal.id === 'awareness' ? [] : [{ label: goal.headlineMetric, value: perf.headline }]),
+                      // Only goals with a narrower result than orders get an extra last step.
+                      ...(goal.id === 'new_customers' || goal.id === 'win_back' ? [{ label: goal.headlineMetric, value: perf.headline }] : []),
                     ]}
                   />
                 </Panel>
@@ -180,7 +181,7 @@ export function CampaignDetail() {
         </Tabs.Panel>
 
         <Tabs.Panel id="bundle" className="pt-4">
-          <Panel title="Formats in this bundle" hint="Fixed by the goal. Budget share is the one thing you control.">
+          <Panel title={campaign.custom ? 'Formats you chose' : 'Formats in this bundle'} hint={campaign.custom ? 'Picked by hand in the custom builder.' : 'Fixed by the goal. Budget share is the one thing you control.'}>
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border text-left text-xs text-muted">
@@ -215,7 +216,10 @@ export function CampaignDetail() {
 
         {usesSearch && (
           <Tabs.Panel id="keywords" className="pt-4">
-            <Panel title="Searches your ads showed for" hint="Chosen automatically. You can't bid on them one by one, but you can stop showing for any that waste money.">
+            <Panel
+              title="Searches your ads showed for"
+              hint={campaign.custom ? `Your ${campaign.custom.match}-match keywords. Stop showing for any that waste money.` : "Chosen automatically. You can't bid on them one by one, but you can stop showing for any that waste money."}
+            >
               {keywords.length === 0 ? (
                 <p className="py-8 text-center text-sm text-muted">No search results yet.</p>
               ) : (

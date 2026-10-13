@@ -112,7 +112,7 @@ export function keywordPerformance(campaign: Campaign): KeywordPerformance[] {
   const clicks = search.reduce((sum, row) => sum + row.clicks, 0)
   const spend = search.reduce((sum, row) => sum + row.spend, 0)
   if (clicks === 0) return []
-  const keywords = AUTO_KEYWORDS.filter((keyword) => !campaign.negativeKeywords.includes(keyword))
+  const keywords = (campaign.custom?.keywords ?? AUTO_KEYWORDS).filter((keyword) => !campaign.negativeKeywords.includes(keyword))
   const weights = keywords.map((_, i) => 1 / (i + 1.5))
   const total = weights.reduce((sum, w) => sum + w, 0)
   return keywords.map((keyword, i) => {

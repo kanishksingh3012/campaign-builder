@@ -27,11 +27,12 @@ export function ShopperPreview() {
         <div>
           <div className="mb-3 flex items-center justify-between text-sm">
             <span className="text-muted">{result.winners.length} of {result.page.length} results are ads</span>
-            <Switch isSelected={highlight} onChange={setHighlight} className="flex-row items-center gap-2">
-              <Switch.Control>
-                <Switch.Thumb />
-              </Switch.Control>
-              <span>Highlight ads</span>
+            <Switch isSelected={highlight} onChange={setHighlight}>
+              <Switch.Content>
+                <Switch.Control>
+                  <Switch.Thumb />
+                </Switch.Control>
+                Highlight ads</Switch.Content>
             </Switch>
           </div>
           <div className="rounded-[2.25rem] border-[7px] border-ink bg-surface p-3 shadow-lift">
