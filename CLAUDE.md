@@ -352,7 +352,7 @@ Estimate: stages 1–6 about 4–5 hours of build and review; 7–8 another 1–
 - Platform name: Endcap (the paid display at the end of a store aisle). Set once in `APP_NAME` in `src/data/catalogue.ts`.
 - Commit after each stage and push.
 - `docs/` holds private study notes and is git-ignored.
-- Shopper preview organic results are real products from a one-time catalogue snapshot (`src/data/catalogueSnapshot.ts`, 14 Oct 2026, first ten non-promoted results per search). No live calls from the app. Real brand names are allowed there only; sponsored ads stay fictional (brands, bids, click rates, relevance). Organic relevance values are illustrative. The page says "catalogue snapshot" next to the "simulated" note.
+- Shopper preview organic results are real products from a one-time catalogue snapshot (`src/data/catalogueSnapshot.ts`, 14 Oct 2026, first ten non-promoted results per search). No live calls from the app. Real brand names are allowed there only; sponsored ads stay fictional (brands, bids, click rates, relevance). Organic relevance values are illustrative. The page says "catalogue snapshot" next to the "simulated" note. Product photos for those results load from the retailer's image host (nothing is stored in the repo) and fall back to the placeholder tile if they can't load.
 
 ## Commands
 
