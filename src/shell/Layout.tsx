@@ -73,14 +73,3 @@ export function PageHeader({ title, subtitle, actions }: { title: string; subtit
     </header>
   )
 }
-
-export function ComingNext({ title }: { title: string }) {
-  return (
-    <>
-      <PageHeader title={title} />
-      <div className="rounded-2xl border border-dashed border-border bg-surface px-6 py-16 text-center text-sm text-muted">
-        This page is built in a later stage.
-      </div>
-    </>
-  )
-}

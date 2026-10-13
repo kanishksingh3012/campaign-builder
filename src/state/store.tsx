@@ -17,6 +17,7 @@ type Action =
   | { type: 'set_status'; ids: string[]; status: CampaignStatus; note: string }
   | { type: 'add_budget'; id: string; amount: number }
   | { type: 'remove'; id: string }
+  | { type: 'set_creative_status'; id: string; status: Creative['status'] }
   | { type: 'reset' }
 
 const initialState: State = { campaigns: SEED_CAMPAIGNS, creatives: CREATIVES, balance: ACCOUNT_BALANCE }
@@ -53,6 +54,8 @@ function reducer(state: State, action: Action): State {
             : c,
         ),
       }
+    case 'set_creative_status':
+      return { ...state, creatives: state.creatives.map((c) => (c.id === action.id ? { ...c, status: action.status } : c)) }
     case 'remove':
       return { ...state, campaigns: state.campaigns.filter((c) => c.id !== action.id) }
     case 'reset':
@@ -84,6 +87,8 @@ interface Store extends State {
   validationContext: (draftId?: string) => ValidationContext
   /** Send a campaign to review. The demo approves it a few seconds later. */
   submit: (campaign: Campaign) => void
+  /** Send a rejected creative back to review; the demo approves it a few seconds later. */
+  resubmitCreative: (id: string) => void
 }
 
 /** How long the simulated review takes. */
@@ -115,6 +120,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           () => dispatch({ type: 'set_status', ids: [campaign.id], status: 'live', note: 'Approved and live' }),
           REVIEW_MS,
         )
+      },
+      resubmitCreative: (id) => {
+        dispatch({ type: 'set_creative_status', id, status: 'in_review' })
+        setTimeout(() => dispatch({ type: 'set_creative_status', id, status: 'approved' }), REVIEW_MS)
       },
       validationContext: (draftId) => {
         const others = state.campaigns.filter((c) => c.id !== draftId)

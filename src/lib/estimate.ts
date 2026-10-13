@@ -4,7 +4,7 @@ import type { Draft, FormatId } from './types'
 // Illustrative forecasting: enough to make budget changes feel real, not a real model.
 
 /** Share of clicks that become an order, by format. */
-const ORDER_RATE: Record<FormatId, number> = {
+export const ORDER_RATE: Record<FormatId, number> = {
   home_banner: 0.06,
   search_banner: 0.09,
   category_boost: 0.14,

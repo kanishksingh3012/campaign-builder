@@ -66,7 +66,10 @@ export function Wizard() {
   const editing = campaigns.find((c) => c.id === id)
   const source = campaigns.find((c) => c.id === params.get('from'))
   const [draft, setDraft] = useState<Draft>(() => (editing ? { ...editing } : source ? duplicate(source) : blankDraft()))
-  const [step, setStep] = useState<WizardStep>(editing || source ? 'budget' : 'goal')
+  const [step, setStep] = useState<WizardStep>(() => {
+    const requested = STEPS.find((s) => s.id === params.get('step'))?.id
+    return requested ?? (editing || source ? 'budget' : 'goal')
+  })
   const [acknowledged, setAcknowledged] = useState(false)
 
   const ctx = useMemo(() => validationContext(draft.id), [validationContext, draft.id])
