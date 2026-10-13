@@ -352,6 +352,15 @@ Estimate: stages 1–6 about 4–5 hours of build and review; 7–8 another 1–
 - Commit after each stage and push.
 - `docs/` holds private study notes and is git-ignored.
 
+## Pending: real products in the shopper preview
+
+Decided by the user, not yet built (needs the Swiggy Instamart MCP, `https://mcp.swiggy.com/im`, connected and signed in):
+
+- Take a one-time snapshot of real Instamart products (name, brand, pack size, price) for the three preview searches in `src/data/ads.ts` ("chips", "diwali gift", "ragi chips") and save it as a data file. No live calls from the app.
+- Real brand names are fine for the **organic** results. **Sponsored ads stay fictional**: invented brands, bids, click rates and relevance.
+- Label the page "catalogue snapshot" next to the existing "simulated" note.
+- Use search/read tools only. Never call cart, checkout or order tools.
+
 ## Commands
 
 - `npm run dev`, `npm test`, `npm run build`
