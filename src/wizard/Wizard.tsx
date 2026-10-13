@@ -70,7 +70,10 @@ export function Wizard() {
   const [draft, setDraft] = useState<Draft>(() => (editing ? { ...editing } : source ? duplicate(source) : blankDraft()))
   const [step, setStep] = useState<WizardStep>(() => {
     const requested = STEPS.find((s) => s.id === params.get('step'))?.id
-    return requested ?? (editing || source ? 'budget' : 'goal')
+    if (requested) return requested
+    // Editing opens on the first step that is blocking the campaign, so "Fix and resubmit" lands on the fix.
+    const blocked = editing ? blockers(validate({ ...editing }, validationContext(editing.id)))[0]?.step : undefined
+    return blocked ?? (editing || source ? 'budget' : 'goal')
   })
   const [acknowledged, setAcknowledged] = useState(false)
 
@@ -181,7 +184,7 @@ export function Wizard() {
 
       <div className="grid grid-cols-[1fr_17rem] items-start gap-5">
         <div key={step} className="rise-in min-w-0">
-          {step === 'goal' && <GoalStep {...stepProps} creatives={creatives} />}
+          {step === 'goal' && <GoalStep {...stepProps} creatives={creatives} locked={Boolean(editing && editing.spent > 0)} />}
           {step === 'bundle' && goal && <BundleStep {...stepProps} creatives={creatives} />}
           {step === 'products' && goal && <ProductsStep {...stepProps} />}
           {step === 'budget' && goal && <BudgetStep {...stepProps} available={ctx.availableBalance} />}

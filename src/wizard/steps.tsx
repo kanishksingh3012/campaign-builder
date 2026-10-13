@@ -54,7 +54,7 @@ export function chooseGoal(draft: Draft, goalId: GoalId, creatives: Creative[]):
   }
 }
 
-export function GoalStep({ draft, update, creatives }: StepProps & { creatives: Creative[] }) {
+export function GoalStep({ draft, update, creatives, locked = false }: StepProps & { creatives: Creative[]; locked?: boolean }) {
   return (
     <Section title="What do you want this campaign to do?" hint="Your goal decides the ad formats, the audience and how results are judged.">
       <div role="radiogroup" aria-label="Campaign goal" className="grid grid-cols-3 gap-3">
@@ -67,9 +67,10 @@ export function GoalStep({ draft, update, creatives }: StepProps & { creatives: 
               type="button"
               role="radio"
               aria-checked={selected}
+              disabled={locked && !selected}
               style={goalStyle(goal.id)}
               onClick={() => update((d) => chooseGoal(d, goal.id, creatives))}
-              className={`pressable flex flex-col rounded-xl border p-4 text-left ${selected ? 'goal-ring' : 'border-border bg-surface'}`}
+              className={`pressable flex flex-col rounded-xl border p-4 text-left disabled:cursor-not-allowed disabled:opacity-50 ${selected ? 'goal-ring' : 'border-border bg-surface'}`}
             >
               <span className="flex items-start justify-between">
                 <span className={`grid size-9 place-items-center rounded-lg ${selected ? 'goal-solid' : 'goal-soft'}`}>
@@ -95,12 +96,16 @@ export function GoalStep({ draft, update, creatives }: StepProps & { creatives: 
           )
         })}
       </div>
-      <p className="mt-4 text-sm text-muted">
-        Want to pick formats, keywords and bids yourself?{' '}
-        <Link to="/campaigns/custom/new" className="font-medium text-accent hover:underline">
-          Build a custom campaign
-        </Link>
-      </p>
+      {locked ? (
+        <p className="mt-4 text-sm text-muted">The goal is fixed once a campaign has spent money, because its results are judged on it. Duplicate the campaign to try another goal.</p>
+      ) : (
+  <p className="mt-4 text-sm text-muted">
+          Want to pick formats, keywords and bids yourself?{' '}
+          <Link to="/campaigns/custom/new" className="font-medium text-accent hover:underline">
+            Build a custom campaign
+          </Link>
+        </p>
+      )}
     </Section>
   )
 }

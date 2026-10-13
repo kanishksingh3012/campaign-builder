@@ -18,7 +18,7 @@ import {
   Wallet,
   type LucideIcon,
 } from 'lucide-react'
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router'
 import { APP_NAME, BRAND } from '../data/catalogue'
 import { inr } from '../lib/format'
@@ -95,7 +95,11 @@ export function Layout({ children }: { children: ReactNode }) {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   // An internal page opened by link shows the internal menu, whatever view was last used.
+  // Checked once per page change only, so switching back to the brand view isn't undone mid-navigation.
+  const checkedPath = useRef<string | null>(null)
   useEffect(() => {
+    if (checkedPath.current === pathname) return
+    checkedPath.current = pathname
     if (pathname.startsWith('/internal') && role !== 'internal') dispatch({ type: 'set_role', role: 'internal' })
   }, [pathname, role, dispatch])
   const nav = role === 'internal' ? INTERNAL_NAV : BRAND_NAV
