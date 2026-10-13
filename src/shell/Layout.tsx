@@ -5,6 +5,7 @@ import {
   ChevronDown,
   ClipboardCheck,
   Eraser,
+  GraduationCap,
   Image,
   Layers,
   LayoutDashboard,
@@ -47,7 +48,13 @@ const BRAND_NAV: { group: string; items: NavItem[] }[] = [
       { to: '/budget', label: 'Budget', icon: Wallet },
     ],
   },
-  { group: 'Understand', items: [{ to: '/preview', label: 'Shopper preview', icon: Smartphone }] },
+  {
+    group: 'Understand',
+    items: [
+      { to: '/preview', label: 'Shopper preview', icon: Smartphone },
+      { to: '/learn', label: 'Learn', icon: GraduationCap },
+    ],
+  },
 ]
 
 // The internal view uses the same shell and page pattern, so brand and internal tools read as one product.
@@ -60,7 +67,13 @@ const INTERNAL_NAV: { group: string; items: NavItem[] }[] = [
       { to: '/internal/inventory', label: 'Inventory', icon: Layers },
     ],
   },
-  { group: 'Understand', items: [{ to: '/preview', label: 'Shopper preview', icon: Smartphone }] },
+  {
+    group: 'Understand',
+    items: [
+      { to: '/preview', label: 'Shopper preview', icon: Smartphone },
+      { to: '/learn', label: 'Learn', icon: GraduationCap },
+    ],
+  },
 ]
 
 const THEME_KEY = 'endcap:theme'
@@ -109,8 +122,12 @@ export function Layout({ children }: { children: ReactNode }) {
     navigate(next === 'internal' ? '/internal/review' : '/')
   }
 
+  const [narrowOk, setNarrowOk] = useState(false)
+
   return (
-    <div className="flex h-screen">
+    <>
+    {!narrowOk && <SmallScreenNote onContinue={() => setNarrowOk(true)} />}
+    <div className={`h-screen ${narrowOk ? 'flex' : 'hidden lg:flex'}`}>
       <aside className="flex w-56 shrink-0 flex-col bg-ink px-3 py-4 text-ink-text">
         <div className="flex items-center gap-2.5 px-2 pb-6">
           <span className="grid size-8 place-items-center rounded-[0.6rem] bg-accent text-accent-foreground" aria-hidden>
@@ -155,6 +172,7 @@ export function Layout({ children }: { children: ReactNode }) {
           <p className="px-2.5 pb-1 text-xs text-ink-muted">Demo controls</p>
           <SidebarAction icon={RotateCcw} label="Reset demo data" onPress={() => dispatch({ type: 'reset' })} />
           <SidebarAction icon={Eraser} label="Start as a new account" onPress={() => dispatch({ type: 'clear' })} />
+          <p className="px-2.5 pt-2 text-xs leading-4 text-ink-muted">Learning prototype. Fictional brand, simulated numbers.</p>
         </div>
       </aside>
 
@@ -219,6 +237,30 @@ export function Layout({ children }: { children: ReactNode }) {
           <div className="mx-auto max-w-7xl min-w-[60rem] px-8 py-6">{children}</div>
         </main>
       </div>
+    </div>
+    </>
+  )
+}
+
+/** Shown in place of the app on phones and small tablets: the layout needs a laptop-width screen. */
+function SmallScreenNote({ onContinue }: { onContinue: () => void }) {
+  return (
+    <div className="flex min-h-screen flex-col justify-center gap-4 bg-ink px-6 py-10 text-ink-text lg:hidden">
+      <span className="flex items-center gap-2.5">
+        <span className="grid size-8 place-items-center rounded-[0.6rem] bg-accent text-accent-foreground" aria-hidden>
+          <EndcapMark />
+        </span>
+        <span className="text-[0.95rem] font-semibold tracking-tight text-white">{APP_NAME}</span>
+      </span>
+      <h1 className="text-2xl font-semibold tracking-tight text-balance text-white">Open this on a laptop to try it.</h1>
+      <p className="max-w-md text-sm leading-6">
+        {APP_NAME} is a practice playground for learning how retail ads work: build a campaign, break its budget, and watch an ad auction change a shopper's search page. Its screens are dense
+        tables and side-by-side panels, so they need a wider screen than this one.
+      </p>
+      <p className="max-w-md text-sm leading-6 text-ink-muted">Learning prototype. The brand is fictional, the numbers are simulated, and it is not affiliated with any company.</p>
+      <button type="button" onClick={onContinue} className="self-start rounded-lg border border-ink-line px-3 py-2 text-sm text-white hover:bg-ink-raised">
+        Continue anyway
+      </button>
     </div>
   )
 }

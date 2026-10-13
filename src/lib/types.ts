@@ -166,8 +166,6 @@ export interface OrganicResult {
   id: string
   product: string
   pack?: string
-  /** Full packshot URL, when the result comes from the catalogue snapshot. */
-  image?: string
   brand: string
   price: number
   relevance: number

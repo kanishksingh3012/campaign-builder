@@ -1,4 +1,5 @@
 import { Route, Routes, useParams } from 'react-router'
+import { Learn } from './pages/Learn'
 import { CampaignDetail } from './pages/CampaignDetail'
 import { Campaigns } from './pages/Campaigns'
 import { Accounts, Inventory, ReviewQueue } from './pages/Internal'
@@ -38,6 +39,7 @@ export default function App() {
         <Route path="/reports" element={<Reports />} />
         <Route path="/budget" element={<Budget />} />
         <Route path="/preview" element={<ShopperPreview />} />
+        <Route path="/learn" element={<Learn />} />
       </Routes>
     </Layout>
   )

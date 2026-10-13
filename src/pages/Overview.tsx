@@ -1,5 +1,6 @@
 import { Button } from '@heroui/react'
-import { AlertTriangle, Check, OctagonAlert, Plus } from 'lucide-react'
+import { AlertTriangle, Check, GraduationCap, OctagonAlert, Plus, X } from 'lucide-react'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { Bar as RechartsBar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { BRAND } from '../data/catalogue'
@@ -16,6 +17,43 @@ import { useStore } from '../state/store'
 const GOAL_ORDER: GoalId[] = ['awareness', 'new_customers', 'win_back', 'custom']
 const DAY = new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short' })
 const day = (date: string) => DAY.format(new Date(date))
+
+const BANNER_KEY = 'endcap:learn-banner-dismissed'
+
+/** A one-line way in for someone who has just arrived. Stays dismissed, even after a demo reset. */
+function LearnBanner() {
+  const [hidden, setHidden] = useState(() => {
+    try {
+      return localStorage.getItem(BANNER_KEY) === '1'
+    } catch {
+      return false
+    }
+  })
+  if (hidden) return null
+  const dismiss = () => {
+    setHidden(true)
+    try {
+      localStorage.setItem(BANNER_KEY, '1')
+    } catch {
+      // Storage can be unavailable; the banner simply returns next visit.
+    }
+  }
+  return (
+    <div className="mb-4 flex items-center gap-3 rounded-2xl border border-border bg-accent-soft px-4 py-3 text-sm text-accent-soft-foreground">
+      <GraduationCap size={18} className="shrink-0" />
+      <p className="flex-1">
+        <span className="font-medium">New to retail ads?</span> This is a practice playground with a fictional brand and simulated numbers. Three short exercises show how goals, budgets and the ad
+        auction work.
+      </p>
+      <Link to="/learn" className="shrink-0 font-medium underline-offset-2 hover:underline">
+        Start learning
+      </Link>
+      <button type="button" onClick={dismiss} aria-label="Dismiss" className="shrink-0 rounded-lg p-1 hover:bg-surface/50">
+        <X size={15} />
+      </button>
+    </div>
+  )
+}
 
 export function Overview() {
   const navigate = useNavigate()
@@ -62,6 +100,7 @@ export function Overview() {
   return (
     <>
       <PageHeader title="Overview" subtitle={`${BRAND} · last 14 days of spend, all campaigns to date`} />
+      <LearnBanner />
 
       <Panel className="mb-4">
         <div className="grid grid-cols-[1fr_17rem] gap-8">

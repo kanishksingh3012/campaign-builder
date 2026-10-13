@@ -1,9 +1,9 @@
 import type { OrganicResult, QueryScenario } from '../lib/types'
-import { CATALOGUE_SNAPSHOT, IMAGE_BASE, type SnapshotProduct } from './catalogueSnapshot'
+import { CATALOGUE_SNAPSHOT, type SnapshotProduct } from './catalogueSnapshot'
 
 /** Organic results are real products in snapshot order; relevance is illustrative and falls with rank. */
 function organicFrom(prefix: string, products: SnapshotProduct[], relevance: number[]): OrganicResult[] {
-  return products.map((p, i) => ({ id: `${prefix}${i + 1}`, product: p.name, pack: p.pack, image: IMAGE_BASE + p.image, brand: p.brand, price: p.price, relevance: relevance[i] }))
+  return products.map((p, i) => ({ id: `${prefix}${i + 1}`, product: p.name, pack: p.pack, brand: p.brand, price: p.price, relevance: relevance[i] }))
 }
 
 // Three searches with different relevance spreads. Organic results come from the catalogue snapshot.

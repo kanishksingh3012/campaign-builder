@@ -1,7 +1,9 @@
 import { Button, Chip, Popover, Slider, Switch } from '@heroui/react'
 import { Search } from 'lucide-react'
 import { useMemo, useState, type ReactNode } from 'react'
+import { useSearchParams } from 'react-router'
 import { SCENARIOS } from '../data/ads'
+import { APP_NAME } from '../data/catalogue'
 import { SNAPSHOT_DATE } from '../data/catalogueSnapshot'
 import { CONVERSION_GUARDRAIL, runAuction, verdict, type AuctionSettings, type RankedAd } from '../lib/auction'
 import { inr, percent } from '../lib/format'
@@ -12,7 +14,9 @@ import { AnimatedNumber, Panel, SimulatedNote } from '../shell/ui'
 const DEFAULT_SETTINGS: AuctionSettings = { slots: 2, relevanceFloor: 0.5 }
 
 export function ShopperPreview() {
-  const [scenarioId, setScenarioId] = useState(SCENARIOS[0].id)
+  // The Learn page links straight to a search, e.g. /preview?q=diwali-gift.
+  const [params] = useSearchParams()
+  const [scenarioId, setScenarioId] = useState(() => SCENARIOS.find((s) => s.id === params.get('q'))?.id ?? SCENARIOS[0].id)
   const [settings, setSettings] = useState(DEFAULT_SETTINGS)
   const [highlight, setHighlight] = useState(false)
   const scenario = SCENARIOS.find((s) => s.id === scenarioId)!
@@ -51,7 +55,7 @@ export function ShopperPreview() {
                     item.kind === 'sponsored' ? `pop-in ${highlight ? 'border-accent bg-accent-soft' : 'border-border'}` : `border-border ${highlight ? 'opacity-55' : ''}`
                   }`}
                 >
-                  {item.kind === 'organic' && item.result.image ? <Packshot src={item.result.image} seed={card.brand} /> : <DrawnPack seed={card.brand} />}
+                  <DrawnPack seed={card.brand} />
                   <span className="flex min-h-5 items-center justify-between gap-1">
                     <span className="truncate text-xs text-muted">{card.brand}</span>
                     {item.kind === 'sponsored' && <WhyThisAd ad={item.ad} eligible={result.eligible.length} />}
@@ -189,23 +193,14 @@ export function ShopperPreview() {
         </div>
       </div>
       <SimulatedNote />
-      <p className="mt-1 text-xs text-muted">Organic results are a catalogue snapshot from {SNAPSHOT_DATE}. Sponsored ads are fictional.</p>
+      <p className="mt-1 max-w-3xl text-xs text-muted">
+        Organic results use real product names and prices from a catalogue snapshot taken on {SNAPSHOT_DATE}, shown for learning only. Sponsored ads are fictional. {APP_NAME} is not affiliated with any of these brands or with any retailer.
+      </p>
     </>
   )
 }
 
-/** A real product photo; falls back to the placeholder tile if the image can't load. */
-function Packshot({ src, seed }: { src: string; seed: string }) {
-  const [failed, setFailed] = useState(false)
-  if (failed) return <DrawnPack seed={seed} />
-  return (
-    <span className="relative mb-2 block h-20 overflow-hidden rounded-lg bg-packshot">
-      <img src={src} alt="" loading="lazy" onError={() => setFailed(true)} className="absolute inset-0 h-full w-full object-contain p-1" />
-    </span>
-  )
-}
-
-/** A drawn snack pouch for the fictional brands, on the same tile as a real product photo. */
+/** A drawn pack tinted by brand. Every card uses one, so an ad differs from an organic result only by its label. */
 function DrawnPack({ seed }: { seed: string }) {
   let hue = 0
   for (const char of seed) hue = (hue * 31 + char.charCodeAt(0)) % 360
