@@ -1,6 +1,6 @@
 import { Button, Chip, Tabs } from '@heroui/react'
 import { Download } from 'lucide-react'
-import { useState } from 'react'
+import { useState, type CSSProperties } from 'react'
 import { Link } from 'react-router'
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { FORMATS, GOAL_LIST, GOALS } from '../data/goals'
@@ -164,7 +164,7 @@ export function Reports() {
                     </span>
                   </div>
                   <span className="block h-2 overflow-hidden rounded-full bg-default">
-                    <span className="bar-fill block h-full rounded-full" style={{ width: `${(row.spend / maxFormatSpend) * 100}%`, background: `var(--goal-${goalId})` }} />
+                    <span className="bar-fill block h-full rounded-full" style={{ '--fill': `${(row.spend / maxFormatSpend) * 100}%`, background: `var(--goal-${goalId})` } as CSSProperties} />
                   </span>
                 </li>
               ))}
@@ -183,7 +183,7 @@ export function Reports() {
                     </span>
                   </div>
                   <span className="block h-2 overflow-hidden rounded-full bg-default">
-                    <span className={`bar-fill block h-full rounded-full ${row.cost === bestCost ? 'bg-success' : 'bg-muted'}`} style={{ width: `${(row.cost / maxCost) * 100}%` }} />
+                    <span className={`bar-fill block h-full rounded-full ${row.cost === bestCost ? 'bg-success' : 'bg-muted'}`} style={{ '--fill': `${(row.cost / maxCost) * 100}%` } as CSSProperties} />
                   </span>
                 </li>
               ))}

@@ -121,7 +121,7 @@ export function Bar({ value, tone = 'accent', className = '' }: { value: number;
   const fill = { accent: 'bg-accent', danger: 'bg-danger', warning: 'bg-warning', success: 'bg-success' }[tone]
   return (
     <span className={`block h-1.5 overflow-hidden rounded-full bg-default ${className}`}>
-      <span className={`bar-fill block h-full rounded-full ${fill}`} style={{ width: `${Math.max(0, Math.min(100, value))}%` }} />
+      <span className={`bar-fill block h-full rounded-full ${fill}`} style={{ '--fill': `${Math.max(0, Math.min(100, value))}%` } as CSSProperties} />
     </span>
   )
 }

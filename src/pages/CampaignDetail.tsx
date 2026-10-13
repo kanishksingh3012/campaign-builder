@@ -1,5 +1,6 @@
 import { Button, Chip, Tabs } from '@heroui/react'
 import { AlertTriangle, ArrowLeft, OctagonAlert } from 'lucide-react'
+import type { CSSProperties } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { TODAY } from '../data/campaigns'
@@ -315,8 +316,8 @@ function Funnel({ steps, goal }: { steps: { label: string; value: number }[]; go
             </span>
           </div>
           {/* Square-root scale so the small late steps stay visible next to impressions. */}
-          <div className="h-2 rounded-full bg-default">
-            <div className="bar-fill h-2 rounded-full" style={{ background: `var(--goal-${goal})`, width: `${Math.max(2, Math.sqrt(step.value / top) * 100)}%` }} />
+          <div className="h-2 overflow-hidden rounded-full bg-default">
+            <div className="bar-fill h-2 rounded-full" style={{ background: `var(--goal-${goal})`, '--fill': `${Math.max(2, Math.sqrt(step.value / top) * 100)}%` } as CSSProperties} />
           </div>
         </li>
       ))}
