@@ -236,7 +236,7 @@ export function ProductsStep({ draft, issues, update, audiencePicker }: StepProp
             const kept = draft.pausedProductIds.includes(product.id)
             return (
               <li key={product.id} className="px-4 py-2.5">
-                <Checkbox
+                <Checkbox className="flex-row items-center gap-2.5"
                   isSelected={selected}
                   onChange={() =>
                     update((d) => ({
@@ -492,7 +492,7 @@ export function ReviewStep({
         </Section>
       )}
 
-      <Checkbox isSelected={acknowledged} onChange={setAcknowledged}>
+      <Checkbox className="flex-row items-center gap-2.5" isSelected={acknowledged} onChange={setAcknowledged}>
         <Checkbox.Control>
           <Checkbox.Indicator />
         </Checkbox.Control>

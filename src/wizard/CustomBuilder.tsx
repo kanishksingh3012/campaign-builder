@@ -178,7 +178,7 @@ export function CustomBuilder() {
                 const format = FORMATS[formatId]
                 return (
                   <div key={formatId} className="rounded-xl border border-border px-3 py-2.5">
-                    <Checkbox isSelected={custom.formats.includes(formatId)} onChange={() => toggleFormat(formatId)}>
+                    <Checkbox className="flex-row items-start gap-2.5" isSelected={custom.formats.includes(formatId)} onChange={() => toggleFormat(formatId)}>
                       <Checkbox.Control>
                         <Checkbox.Indicator />
                       </Checkbox.Control>

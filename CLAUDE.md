@@ -340,6 +340,7 @@ Estimate: stages 1–6 about 4–5 hours of build and review; 7–8 another 1–
 - UI library: HeroUI v3. Look: sleek, clean, rounded, dense enough for many elements per screen.
 - Custom (format-first) campaigns: built as a single-page builder (`src/wizard/CustomBuilder.tsx`); goal `custom`, formats/audiences/keywords/bids in `campaign.custom`. Always read a campaign's formats through `bundleOf()` in `src/lib/bundle.ts`.
 - Combined audiences: custom campaigns only (union, capped at everyone). Goal-based audiences stay locked.
+- Offers: brand-funded price offers from three fixed templates (buy X get Y, percent off, bundle price), built in `src/pages/Offers.tsx` with rules in `src/lib/offers.ts`. Publishing needs no review; an offer starting today goes live at once.
 - Internal view (ops and sales): same shell, switched by the Brand/Internal control in the sidebar. Pages in `src/pages/Internal.tsx`: review queue, accounts, inventory. In the internal view submissions wait for manual review; in the brand view they auto-approve after a few seconds.
 - Repo: public on GitHub. Demo: deploy to a public URL at the end.
 - Platform name: Endcap (the paid display at the end of a store aisle). Set once in `APP_NAME` in `src/data/catalogue.ts`.

@@ -7,6 +7,7 @@ import { rankAds, runAuction } from './auction'
 import { audienceSize, bundleOf } from './bundle'
 import { estimate } from './estimate'
 import { count, inr } from './format'
+import { blankOffer, redemption, redemptionsCovered, validateOffer, type Offer } from './offers'
 import type { Draft } from './types'
 import { blockers, splitTotal, validate, type ValidationContext } from './validate'
 
@@ -182,6 +183,39 @@ describe('custom campaigns', () => {
     expect(codes).toEqual(expect.arrayContaining(['bid_below_floor:search_ads', 'no_keywords']))
     expect(fix(broken, 'bid_below_floor:search_ads').fixed.custom!.bids.search_ads).toBe(7)
     expect(fix(broken, 'no_keywords').fixed.custom!.keywords.length).toBeGreaterThan(0)
+  })
+})
+
+describe('offers', () => {
+  const base: Offer = { ...blankOffer(), id: 'new', name: 'Test', productIds: ['p2'], cityIds: ['hyd'], startDate: '2026-11-01', endDate: '2026-11-10', status: 'scheduled' }
+  const fixOffer = (offer: Offer, code: string, others: Offer[] = []) => {
+    const fixed = validateOffer(offer, PRODUCTS, others).find((i) => i.code === code)!.fixes[0].apply(offer)
+    return { fixed, codes: validateOffer(fixed, PRODUCTS, others).map((i) => i.code) }
+  }
+
+  it('passes a valid percent offer and computes what the shopper saves', () => {
+    expect(validateOffer(base, PRODUCTS, [])).toEqual([])
+    expect(redemption(base, PRODUCTS)).toEqual({ units: 1, full: 20, pays: 17, saves: 3 })
+    expect(redemptionsCovered(base, PRODUCTS)).toBe(8333)
+  })
+
+  it('caps discount depth and fixes it in one step', () => {
+    expect(fixOffer({ ...base, percent: 70 }, 'percent_too_deep').fixed.percent).toBe(50)
+    expect(fixOffer({ ...base, template: 'bxgy', buyQty: 1, getQty: 3 }, 'bxgy_too_generous').codes).toEqual([])
+  })
+
+  it('requires a bundle to cost less than its parts', () => {
+    const bundle: Offer = { ...base, template: 'bundle', productIds: ['p2', 'p4'], bundlePrice: 60 }
+    const { fixed, codes } = fixOffer(bundle, 'bundle_no_saving')
+    expect(fixed.bundlePrice).toBe(45)
+    expect(codes).toEqual([])
+  })
+
+  it('blocks two offers on the same product, city and dates', () => {
+    const running: Offer = { ...base, id: 'other', name: 'Running' }
+    const { fixed, codes } = fixOffer(base, 'offer_overlap', [running])
+    expect(fixed.startDate).toBe('2026-11-11')
+    expect(codes).toEqual([])
   })
 })
 

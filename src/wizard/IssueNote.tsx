@@ -1,9 +1,16 @@
 import { Button } from '@heroui/react'
 import { AlertTriangle, OctagonAlert } from 'lucide-react'
-import type { Draft, Issue } from '../lib/types'
+
+/** The part of an issue this component needs; `T` is whatever the fix edits (a campaign draft, an offer). */
+export interface FixableIssue<T> {
+  code: string
+  severity: 'blocker' | 'warning'
+  message: string
+  fixes: { label: string; apply: (value: T) => T }[]
+}
 
 /** One problem, stated beside the field it belongs to, with its fixes one click away. */
-export function IssueNote({ issue, onFix }: { issue: Issue; onFix: (apply: (draft: Draft) => Draft) => void }) {
+export function IssueNote<T>({ issue, onFix }: { issue: FixableIssue<T>; onFix: (apply: (value: T) => T) => void }) {
   const blocker = issue.severity === 'blocker'
   return (
     <div
@@ -25,7 +32,7 @@ export function IssueNote({ issue, onFix }: { issue: Issue; onFix: (apply: (draf
   )
 }
 
-export function IssueList({ issues, onFix }: { issues: Issue[]; onFix: (apply: (draft: Draft) => Draft) => void }) {
+export function IssueList<T>({ issues, onFix }: { issues: FixableIssue<T>[]; onFix: (apply: (value: T) => T) => void }) {
   if (issues.length === 0) return null
   return (
     <div className="flex flex-col gap-2">

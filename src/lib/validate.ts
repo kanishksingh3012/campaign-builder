@@ -126,7 +126,9 @@ export function validate(draft: Draft, ctx: ValidationContext): Issue[] {
 
   // Split
   const total = splitTotal(draft)
-  if (total !== 100) {
+  if (bundle.length === 0) {
+    // Nothing to split until a format is chosen; the missing-format blocker already covers it.
+  } else if (total !== 100) {
     const remaining = 100 - total
     issues.push({
       code: 'split_total', step: 'budget', field: 'split', severity: 'blocker',

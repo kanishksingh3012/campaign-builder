@@ -1,10 +1,11 @@
 import { createContext, useContext, useEffect, useMemo, useReducer, useRef, type ReactNode } from 'react'
 import { ACCOUNT_BALANCE, SEED_CAMPAIGNS, TODAY } from '../data/campaigns'
 import { CREATIVES, PRODUCTS } from '../data/catalogue'
+import { SEED_OFFERS, type Offer, type OfferStatus } from '../lib/offers'
 import type { Campaign, CampaignStatus, Creative } from '../lib/types'
 import type { ValidationContext } from '../lib/validate'
 
-const STORAGE_KEY = 'campaign-builder:v2'
+const STORAGE_KEY = 'campaign-builder:v3'
 
 /** Who is looking: the advertiser, or the platform's own ops and sales team. */
 export type Role = 'brand' | 'internal'
@@ -12,6 +13,7 @@ export type Role = 'brand' | 'internal'
 interface State {
   campaigns: Campaign[]
   creatives: Creative[]
+  offers: Offer[]
   balance: number
   role: Role
 }
@@ -22,6 +24,8 @@ type Action =
   | { type: 'add_budget'; id: string; amount: number }
   | { type: 'remove'; id: string }
   | { type: 'set_creative_status'; id: string; status: Creative['status'] }
+  | { type: 'upsert_offer'; offer: Offer }
+  | { type: 'set_offer_status'; id: string; status: OfferStatus }
   | { type: 'set_role'; role: Role }
   | { type: 'review_campaign'; id: string; approve: boolean; reason?: string }
   | { type: 'review_creative'; id: string; approve: boolean; reason?: string }
@@ -29,7 +33,7 @@ type Action =
   | { type: 'reset' }
   | { type: 'clear' }
 
-const initialState: State = { campaigns: SEED_CAMPAIGNS, creatives: CREATIVES, balance: ACCOUNT_BALANCE, role: 'brand' }
+const initialState: State = { campaigns: SEED_CAMPAIGNS, creatives: CREATIVES, offers: SEED_OFFERS, balance: ACCOUNT_BALANCE, role: 'brand' }
 
 const log = (campaign: Campaign, text: string): Campaign['activity'] => [...campaign.activity, { date: TODAY, text }]
 
@@ -78,6 +82,12 @@ function reducer(state: State, action: Action): State {
       }
     case 'remove':
       return { ...state, campaigns: state.campaigns.filter((c) => c.id !== action.id) }
+    case 'upsert_offer': {
+      const exists = state.offers.some((o) => o.id === action.offer.id)
+      return { ...state, offers: exists ? state.offers.map((o) => (o.id === action.offer.id ? action.offer : o)) : [action.offer, ...state.offers] }
+    }
+    case 'set_offer_status':
+      return { ...state, offers: state.offers.map((o) => (o.id === action.id ? { ...o, status: action.status } : o)) }
     case 'set_role':
       return { ...state, role: action.role }
     case 'auto_approve':
@@ -114,7 +124,7 @@ function reducer(state: State, action: Action): State {
     case 'reset':
       return { ...initialState, role: state.role }
     case 'clear':
-      return { ...initialState, campaigns: [], role: state.role }
+      return { ...initialState, campaigns: [], offers: [], role: state.role }
   }
 }
 

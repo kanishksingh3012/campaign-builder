@@ -1,5 +1,5 @@
 import { Button } from '@heroui/react'
-import { BarChart3, Building2, ClipboardCheck, Eraser, Image, Layers, LayoutDashboard, Megaphone, RotateCcw, Smartphone, Wallet } from 'lucide-react'
+import { BarChart3, Building2, ClipboardCheck, Eraser, Image, Layers, LayoutDashboard, Megaphone, RotateCcw, Smartphone, Tag, Wallet } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { NavLink, useNavigate } from 'react-router'
 import { APP_NAME, BRAND } from '../data/catalogue'
@@ -9,6 +9,7 @@ import { useStore } from '../state/store'
 const NAV = [
   { to: '/', label: 'Overview', icon: LayoutDashboard },
   { to: '/campaigns', label: 'Campaigns', icon: Megaphone },
+  { to: '/offers', label: 'Offers', icon: Tag },
   { to: '/creatives', label: 'Creatives', icon: Image },
   { to: '/reports', label: 'Reports', icon: BarChart3 },
   { to: '/budget', label: 'Budget', icon: Wallet },
