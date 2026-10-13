@@ -40,7 +40,7 @@ export function Creatives() {
           </Tabs.List>
         </Tabs.ListContainer>
       </Tabs>
-      <ul className="grid grid-cols-3 gap-4">
+      <ul className="grid grid-cols-3 items-start gap-4">
         {shown.map((creative) => {
           const usedIn = campaigns.filter((c) => c.creativeId === creative.id)
           const status = CREATIVE_STATUS[creative.status]
@@ -288,7 +288,7 @@ export function Budget() {
                 <td className="px-3 py-2.5 text-right">{inr(campaign.budget)}</td>
                 <td className="px-3 py-2.5 text-right">{inr(campaign.spent)}</td>
                 <td className="px-3 py-2.5 text-right font-medium">{inr(Math.max(0, campaign.budget - campaign.spent))}</td>
-                <td className="px-3 py-2.5 text-muted">{campaign.endDate}</td>
+                <td className="px-3 py-2.5 text-muted">{DAY.format(new Date(campaign.endDate))}</td>
                 <td className="py-2.5 pl-3 text-right">{campaign.status !== 'in_review' && <AddBudgetMenu campaign={campaign} />}</td>
               </tr>
             ))}

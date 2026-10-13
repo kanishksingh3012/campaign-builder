@@ -6,7 +6,7 @@ import { SNAPSHOT_DATE } from '../data/catalogueSnapshot'
 import { CONVERSION_GUARDRAIL, runAuction, verdict, type AuctionSettings, type RankedAd } from '../lib/auction'
 import { inr, percent } from '../lib/format'
 import { PageHeader } from '../shell/Layout'
-import { AnimatedNumber, Panel, SimulatedNote, Thumb } from '../shell/ui'
+import { AnimatedNumber, Panel, SimulatedNote } from '../shell/ui'
 
 /** The setup every change is compared against. */
 const DEFAULT_SETTINGS: AuctionSettings = { slots: 2, relevanceFloor: 0.5 }
@@ -51,7 +51,7 @@ export function ShopperPreview() {
                     item.kind === 'sponsored' ? `pop-in ${highlight ? 'border-accent bg-accent-soft' : 'border-border'}` : `border-border ${highlight ? 'opacity-55' : ''}`
                   }`}
                 >
-                  {item.kind === 'organic' && item.result.image ? <Packshot src={item.result.image} seed={card.brand} /> : <Thumb seed={card.brand} className="mb-2 h-20" />}
+                  {item.kind === 'organic' && item.result.image ? <Packshot src={item.result.image} seed={card.brand} /> : <DrawnPack seed={card.brand} />}
                   <span className="flex min-h-5 items-center justify-between gap-1">
                     <span className="truncate text-xs text-muted">{card.brand}</span>
                     {item.kind === 'sponsored' && <WhyThisAd ad={item.ad} eligible={result.eligible.length} />}
@@ -120,7 +120,7 @@ export function ShopperPreview() {
                 value={result.winners.length ? `${ctrGap >= 0 ? '+' : '−'}${Math.abs(Math.round(ctrGap * 100))}%` : '—'}
                 note={result.winners.length ? `${percent(result.sponsoredCtr, 1)} vs ${percent(result.organicCtr, 1)}` : 'No ads shown'}
               />
-              <Readout label="Search conversion" value={<AnimatedNumber value={result.conversion} format={(v) => percent(v, 1)} />} note={`${Math.round(result.conversionChange * 100)}% vs no ads`} />
+              <Readout label="Search conversion" value={<AnimatedNumber value={result.conversion} format={(v) => percent(v, 1)} />} note={`${signedPercent(result.conversionChange)} vs no ads`} />
             </dl>
             <p className="mt-4 rounded-xl bg-default px-3 py-2 text-sm">
               <span className="font-medium">{verdict(result, baseline)}.</span>{' '}
@@ -149,7 +149,8 @@ export function ShopperPreview() {
                   return (
                     <tr key={ad.id} className="border-b border-border last:border-0">
                       <td className="py-2 pr-3">
-                        <span className="font-medium">{ad.product}</span> <span className="text-muted">{[ad.pack, ad.brand].filter(Boolean).join(' · ')}</span>
+                        <span className="block font-medium">{ad.product}</span>
+                        <span className="block text-xs text-muted">{[ad.pack, ad.brand].filter(Boolean).join(' · ')}</span>
                       </td>
                       <td className="tabular px-3 py-2 text-right">{inr(ad.bid)}</td>
                       <td className="tabular px-3 py-2 text-right">{percent(ad.pCtr, 1)}</td>
@@ -167,7 +168,8 @@ export function ShopperPreview() {
                 {result.filtered.map((ad) => (
                   <tr key={ad.id} className="border-b border-border text-muted last:border-0">
                     <td className="py-2 pr-3">
-                      {ad.product} <span>{[ad.pack, ad.brand].filter(Boolean).join(' · ')}</span>
+                      <span className="block">{ad.product}</span>
+                      <span className="block text-xs">{[ad.pack, ad.brand].filter(Boolean).join(' · ')}</span>
                     </td>
                     <td className="tabular px-3 py-2 text-right">{inr(ad.bid)}</td>
                     <td className="tabular px-3 py-2 text-right">{percent(ad.pCtr, 1)}</td>
@@ -195,12 +197,35 @@ export function ShopperPreview() {
 /** A real product photo; falls back to the placeholder tile if the image can't load. */
 function Packshot({ src, seed }: { src: string; seed: string }) {
   const [failed, setFailed] = useState(false)
-  if (failed) return <Thumb seed={seed} className="mb-2 h-20" />
+  if (failed) return <DrawnPack seed={seed} />
   return (
     <span className="relative mb-2 block h-20 overflow-hidden rounded-lg bg-packshot">
       <img src={src} alt="" loading="lazy" onError={() => setFailed(true)} className="absolute inset-0 h-full w-full object-contain p-1" />
     </span>
   )
+}
+
+/** A drawn snack pouch for the fictional brands, on the same tile as a real product photo. */
+function DrawnPack({ seed }: { seed: string }) {
+  let hue = 0
+  for (const char of seed) hue = (hue * 31 + char.charCodeAt(0)) % 360
+  return (
+    <span aria-hidden className="mb-2 grid h-20 place-items-center rounded-lg bg-packshot">
+      <svg viewBox="0 0 44 60" className="h-[4.25rem]">
+        <path d="M5 4 L8 1 L11 4 L14 1 L17 4 L20 1 L23 4 L26 1 L29 4 L32 1 L35 4 L38 1 L40 4 Q43 30 40 56 L37 59 L34 56 L31 59 L28 56 L25 59 L22 56 L19 59 L16 56 L13 59 L10 56 L7 59 L5 56 Q1 30 5 4 Z" fill={`oklch(0.68 0.15 ${hue})`} />
+        <rect x="3.6" y="20" width="37" height="15" fill={`oklch(0.97 0.02 ${hue})`} />
+        <text x="22" y="30.5" textAnchor="middle" fontSize="6.5" fontWeight="700" fill={`oklch(0.38 0.12 ${hue})`}>
+          {seed.length > 9 ? seed.slice(0, 8) + '…' : seed}
+        </text>
+        <circle cx="22" cy="45" r="5" fill={`oklch(0.86 0.1 ${hue})`} />
+      </svg>
+    </span>
+  )
+}
+
+function signedPercent(fraction: number): string {
+  const value = Math.round(fraction * 100)
+  return `${value > 0 ? '+' : value < 0 ? '−' : ''}${Math.abs(value)}%`
 }
 
 function WhyThisAd({ ad, eligible }: { ad: RankedAd; eligible: number }) {

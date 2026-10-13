@@ -20,6 +20,13 @@ export function percent(fraction: number, digits = 0): string {
   return `${(fraction * 100).toFixed(digits)}%`
 }
 
+const dayFormat = new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short' })
+
+/** 20 Oct, from an ISO date. */
+export function shortDate(iso: string): string {
+  return dayFormat.format(new Date(iso))
+}
+
 export function daysBetween(start: string, end: string): number {
   const ms = new Date(end).getTime() - new Date(start).getTime()
   return Math.round(ms / 86400000) + 1

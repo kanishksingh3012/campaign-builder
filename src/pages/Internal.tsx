@@ -5,7 +5,7 @@ import { BRAND, PRODUCTS } from '../data/catalogue'
 import { FORMATS, GOALS } from '../data/goals'
 import { alertFor } from '../lib/alerts'
 import { bundleOf } from '../lib/bundle'
-import { inr, percent } from '../lib/format'
+import { inr, percent, shortDate } from '../lib/format'
 import { totals } from '../lib/simulate'
 import type { Campaign, FormatId } from '../lib/types'
 import { PageHeader } from '../shell/Layout'
@@ -68,7 +68,7 @@ export function ReviewQueue() {
                       {campaign.onBehalf && <span className="ml-2 text-xs font-normal text-muted">created by account manager</span>}
                     </p>
                     <p className="tabular text-muted">
-                      {BRAND} · {GOALS[campaign.goal].name} · {inr(campaign.budget)} · {campaign.startDate} to {campaign.endDate}
+                      {BRAND} · {GOALS[campaign.goal].name} · {inr(campaign.budget)} · {shortDate(campaign.startDate)} – {shortDate(campaign.endDate)}
                     </p>
                     <p className="text-muted">{bundleOf(campaign).map((item) => FORMATS[item.format].name).join(', ')}</p>
                   </div>
@@ -100,7 +100,9 @@ export function ReviewQueue() {
             <ul className="divide-y divide-border rounded-xl border border-border">
               {waitingCreatives.map((creative) => (
                 <li key={creative.id} className="flex items-center gap-4 px-4 py-3 text-sm">
-                  <BannerArt name={creative.name} className="h-14 w-36 shrink-0" />
+                  <span className="w-36 shrink-0">
+                    <BannerArt name={creative.name} className="h-14 w-full" />
+                  </span>
                   <span className="flex-1">
                     <span className="font-medium">{creative.name}</span>
                     <span className="block text-muted">{BRAND}</span>

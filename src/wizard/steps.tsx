@@ -6,7 +6,7 @@ import { AUTO_KEYWORDS, BRAND, PRODUCTS } from '../data/catalogue'
 import { CITIES, FORMATS, GOAL_LIST, GOALS } from '../data/goals'
 import { bundleOf } from '../lib/bundle'
 import { audienceSize, estimate } from '../lib/estimate'
-import { count, daysBetween, inr, range } from '../lib/format'
+import { count, daysBetween, inr, range, shortDate } from '../lib/format'
 import type { Creative, Draft, GoalId, Issue, WizardStep } from '../lib/types'
 import { recommendedSplit, splitTotal } from '../lib/validate'
 import { BannerArt, GOAL_ICON, goalStyle } from '../shell/ui'
@@ -469,7 +469,7 @@ export function ReviewStep({
     { label: 'Products', value: PRODUCTS.filter((p) => draft.productIds.includes(p.id)).map((p) => p.name).join(', ') || 'None', step: 'products' },
     { label: 'Audience', value: `${goal.audience} in ${cities.join(', ') || 'no cities'}`, step: 'products' },
     { label: 'Budget', value: `${inr(draft.budget)}, ${draft.pacing === 'even' ? 'spent evenly' : 'front-loaded'}`, step: 'budget' },
-    { label: 'Schedule', value: `${draft.startDate} to ${draft.endDate} (${days} days)`, step: 'budget' },
+    { label: 'Schedule', value: `${shortDate(draft.startDate)} – ${shortDate(draft.endDate)} (${days} days)`, step: 'budget' },
   ]
 
   return (

@@ -19,7 +19,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
-import { NavLink, useNavigate } from 'react-router'
+import { NavLink, useLocation, useNavigate } from 'react-router'
 import { APP_NAME, BRAND } from '../data/catalogue'
 import { inr } from '../lib/format'
 import { useStore } from '../state/store'
@@ -93,6 +93,11 @@ export function Layout({ children }: { children: ReactNode }) {
   const [theme, toggleTheme] = useTheme()
   const { available, dispatch, role, campaigns, creatives } = useStore()
   const navigate = useNavigate()
+  const { pathname } = useLocation()
+  // An internal page opened by link shows the internal menu, whatever view was last used.
+  useEffect(() => {
+    if (pathname.startsWith('/internal') && role !== 'internal') dispatch({ type: 'set_role', role: 'internal' })
+  }, [pathname, role, dispatch])
   const nav = role === 'internal' ? INTERNAL_NAV : BRAND_NAV
   const waiting = campaigns.filter((c) => c.status === 'in_review').length + creatives.filter((c) => c.status === 'in_review').length
   const switchTo = (next: typeof role) => {

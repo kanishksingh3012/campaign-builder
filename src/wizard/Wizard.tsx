@@ -251,7 +251,9 @@ export function Wizard() {
       <footer className="fixed right-0 bottom-0 left-56 border-t border-border bg-surface/90 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-8 py-3">
           <p className="text-sm text-muted">
-            {stepBlocked
+            {stepBlocked && step === 'goal'
+              ? 'Pick a goal to continue.'
+              : stepBlocked
               ? `Fix ${blockers(stepIssues).length} blocker${blockers(stepIssues).length === 1 ? '' : 's'} on this step to continue.`
               : step === 'review' && blockerCount > 0
                 ? `${blockerCount} blocker${blockerCount === 1 ? '' : 's'} left before you can submit.`
