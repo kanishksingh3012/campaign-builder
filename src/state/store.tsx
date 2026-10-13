@@ -82,7 +82,12 @@ interface Store extends State {
   available: number
   /** Validation context for a draft; its own committed budget is handed back as available. */
   validationContext: (draftId?: string) => ValidationContext
+  /** Send a campaign to review. The demo approves it a few seconds later. */
+  submit: (campaign: Campaign) => void
 }
+
+/** How long the simulated review takes. */
+const REVIEW_MS = 6000
 
 const StoreContext = createContext<Store | null>(null)
 
@@ -104,6 +109,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       dispatch,
       committed: total,
       available: state.balance - total,
+      submit: (campaign) => {
+        dispatch({ type: 'upsert', campaign: { ...campaign, status: 'in_review' } })
+        setTimeout(
+          () => dispatch({ type: 'set_status', ids: [campaign.id], status: 'live', note: 'Approved and live' }),
+          REVIEW_MS,
+        )
+      },
       validationContext: (draftId) => {
         const others = state.campaigns.filter((c) => c.id !== draftId)
         return {

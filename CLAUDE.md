@@ -1,6 +1,6 @@
 # QuickCart Ads: a brand ads platform (interview prototype)
 
-Status: stages 1-2 done (data, logic, tests, shell, campaigns list). Next: create wizard.
+Status: stages 1-3 done (data, logic, tests, shell, campaigns list, create wizard). Next: shopper preview + auction simulator.
 
 ## Why this exists
 

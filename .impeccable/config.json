@@ -1,0 +1,23 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "docs/how-instamart-works.html"
+        ],
+        "createdAt": "2026-10-13T15:08:03.495Z",
+        "reason": "Claude triage: only one-sided thick border is a 3px legend line swatch (.legend i), not a card accent"
+      },
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "createdAt": "2026-10-13T15:37:06.985Z",
+        "reason": "user confirmed: keep Inter"
+      }
+    ]
+  }
+}

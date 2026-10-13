@@ -55,8 +55,8 @@ export function Layout({ children }: { children: ReactNode }) {
           </Button>
         </div>
       </aside>
-      <main className="min-w-0 flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-7xl px-8 py-6">{children}</div>
+      <main className="min-w-0 flex-1 overflow-auto">
+        <div className="mx-auto max-w-7xl min-w-[60rem] px-8 py-6">{children}</div>
       </main>
     </div>
   )
