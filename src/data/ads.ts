@@ -1,6 +1,13 @@
-import type { QueryScenario } from '../lib/types'
+import type { OrganicResult, QueryScenario } from '../lib/types'
+import { CATALOGUE_SNAPSHOT, type SnapshotProduct } from './catalogueSnapshot'
 
-// Three searches with different relevance spreads. All brands, bids and rates are fictional.
+/** Organic results are real products in snapshot order; relevance is illustrative and falls with rank. */
+function organicFrom(prefix: string, products: SnapshotProduct[], relevance: number[]): OrganicResult[] {
+  return products.map((p, i) => ({ id: `${prefix}${i + 1}`, product: `${p.name} ${p.pack}`, brand: p.brand, price: p.price, relevance: relevance[i] }))
+}
+
+// Three searches with different relevance spreads. Organic results come from the catalogue snapshot.
+// Every sponsored ad is fictional: brands, bids, click rates and relevance.
 export const SCENARIOS: QueryScenario[] = [
   {
     id: 'chips',
@@ -16,18 +23,7 @@ export const SCENARIOS: QueryScenario[] = [
       { id: 'a7', product: 'Instant Noodles 4 pack', brand: 'Slurpy', price: 56, bid: 16, pCtr: 0.012, relevance: 0.15 },
       { id: 'a8', product: 'Protein Chips 40 g', brand: 'Fitbite', price: 60, bid: 7, pCtr: 0.04, relevance: 0.75 },
     ],
-    organic: [
-      { id: 'o1', product: 'Magic Masala Chips 52 g', brand: 'Tato', price: 20, relevance: 0.97 },
-      { id: 'o2', product: 'Classic Salted Chips 52 g', brand: 'Tato', price: 20, relevance: 0.96 },
-      { id: 'o3', product: 'Cream & Onion 90 g', brand: 'Crisp & Co', price: 40, relevance: 0.93 },
-      { id: 'o4', product: 'Tangy Tomato Wafers 50 g', brand: 'Wafello', price: 20, relevance: 0.9 },
-      { id: 'o5', product: 'Spicy Treat Chips 90 g', brand: 'Tato', price: 40, relevance: 0.88 },
-      { id: 'o6', product: 'Banana Chips 100 g', brand: 'Keraleaf', price: 55, relevance: 0.84 },
-      { id: 'o7', product: 'Nacho Cheese Triangles 70 g', brand: 'Mexito', price: 45, relevance: 0.8 },
-      { id: 'o8', product: 'Protein Chips 40 g', brand: 'Fitbite', price: 60, relevance: 0.75 },
-      { id: 'o9', product: 'Kettle Cooked Sea Salt 80 g', brand: 'Wafello', price: 75, relevance: 0.74 },
-      { id: 'o10', product: 'Baked Ragi Chips 75 g', brand: 'Crisp & Co', price: 60, relevance: 0.7 },
-    ],
+    organic: organicFrom('o', CATALOGUE_SNAPSHOT.chips, [0.97, 0.96, 0.93, 0.9, 0.88, 0.84, 0.8, 0.75, 0.74, 0.7]),
   },
   {
     id: 'diwali-gift',
@@ -42,18 +38,7 @@ export const SCENARIOS: QueryScenario[] = [
       { id: 'b6', product: 'Scented Candle Set', brand: 'Glowly', price: 349, bid: 15, pCtr: 0.055, relevance: 0.85 },
       { id: 'b7', product: 'Instant Noodles 12 pack', brand: 'Slurpy', price: 168, bid: 28, pCtr: 0.01, relevance: 0.1 },
     ],
-    organic: [
-      { id: 'q1', product: 'Premium Dry Fruit Box 400 g', brand: 'Nutkart', price: 749, relevance: 0.96 },
-      { id: 'q2', product: 'Kaju Katli 500 g', brand: 'Mithaas', price: 520, relevance: 0.94 },
-      { id: 'q3', product: 'Assorted Chocolate Hamper', brand: 'Cocoro', price: 649, relevance: 0.92 },
-      { id: 'q4', product: 'Diya Set of 12', brand: 'Glowly', price: 149, relevance: 0.9 },
-      { id: 'q5', product: 'Soan Papdi 500 g', brand: 'Mithaas', price: 180, relevance: 0.86 },
-      { id: 'q6', product: 'Scented Candle Set', brand: 'Glowly', price: 349, relevance: 0.84 },
-      { id: 'q7', product: 'Cookie Gift Tin 400 g', brand: 'Bakewell', price: 399, relevance: 0.82 },
-      { id: 'q8', product: 'Gift Wrap Paper 5 sheets', brand: 'Wrapit', price: 99, relevance: 0.78 },
-      { id: 'q9', product: 'Roasted Almonds 250 g', brand: 'Nutkart', price: 329, relevance: 0.72 },
-      { id: 'q10', product: 'Fruit Juice Gift Pack', brand: 'Orcha', price: 260, relevance: 0.68 },
-    ],
+    organic: organicFrom('q', CATALOGUE_SNAPSHOT['diwali-gift'], [0.96, 0.94, 0.92, 0.9, 0.86, 0.84, 0.82, 0.78, 0.72, 0.68]),
   },
   {
     id: 'ragi-chips',
@@ -66,17 +51,6 @@ export const SCENARIOS: QueryScenario[] = [
       { id: 'c4', product: 'Cola 750 ml', brand: 'Fizzup', price: 40, bid: 14, pCtr: 0.008, relevance: 0.1 },
       { id: 'c5', product: 'Millet Cookies 150 g', brand: 'Bakewell', price: 90, bid: 6, pCtr: 0.03, relevance: 0.55 },
     ],
-    organic: [
-      { id: 'r1', product: 'Baked Ragi Chips 75 g', brand: 'Crisp & Co', price: 60, relevance: 0.98 },
-      { id: 'r2', product: 'Ragi Crisps Peri Peri 60 g', brand: 'Milleto', price: 55, relevance: 0.95 },
-      { id: 'r3', product: 'Jowar Puffs 50 g', brand: 'Milleto', price: 45, relevance: 0.8 },
-      { id: 'r4', product: 'Multigrain Chips 80 g', brand: 'Fitbite', price: 70, relevance: 0.76 },
-      { id: 'r5', product: 'Roasted Makhana 70 g', brand: 'Crisp & Co', price: 99, relevance: 0.66 },
-      { id: 'r6', product: 'Millet Cookies 150 g', brand: 'Bakewell', price: 90, relevance: 0.6 },
-      { id: 'r7', product: 'Protein Chips 40 g', brand: 'Fitbite', price: 60, relevance: 0.6 },
-      { id: 'r8', product: 'Ragi Flour 1 kg', brand: 'Grainly', price: 85, relevance: 0.5 },
-      { id: 'r9', product: 'Banana Chips 100 g', brand: 'Keraleaf', price: 55, relevance: 0.45 },
-      { id: 'r10', product: 'Classic Salted Chips 52 g', brand: 'Tato', price: 20, relevance: 0.4 },
-    ],
+    organic: organicFrom('r', CATALOGUE_SNAPSHOT['ragi-chips'], [0.98, 0.95, 0.8, 0.76, 0.66, 0.6, 0.6, 0.5, 0.45, 0.4]),
   },
 ]

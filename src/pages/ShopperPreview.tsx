@@ -2,6 +2,7 @@ import { Button, Chip, Popover, Slider, Switch } from '@heroui/react'
 import { Search } from 'lucide-react'
 import { useMemo, useState, type ReactNode } from 'react'
 import { SCENARIOS } from '../data/ads'
+import { SNAPSHOT_DATE } from '../data/catalogueSnapshot'
 import { CONVERSION_GUARDRAIL, runAuction, verdict, type AuctionSettings, type RankedAd } from '../lib/auction'
 import { inr, percent } from '../lib/format'
 import { PageHeader } from '../shell/Layout'
@@ -185,6 +186,7 @@ export function ShopperPreview() {
         </div>
       </div>
       <SimulatedNote />
+      <p className="mt-1 text-xs text-muted">Organic results are a catalogue snapshot from {SNAPSHOT_DATE}. Sponsored ads are fictional.</p>
     </>
   )
 }

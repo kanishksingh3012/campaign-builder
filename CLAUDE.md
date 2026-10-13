@@ -351,15 +351,7 @@ Estimate: stages 1–6 about 4–5 hours of build and review; 7–8 another 1–
 - Platform name: Endcap (the paid display at the end of a store aisle). Set once in `APP_NAME` in `src/data/catalogue.ts`.
 - Commit after each stage and push.
 - `docs/` holds private study notes and is git-ignored.
-
-## Pending: real products in the shopper preview
-
-Decided by the user, not yet built (needs the Swiggy Instamart MCP, `https://mcp.swiggy.com/im`, connected and signed in):
-
-- Take a one-time snapshot of real Instamart products (name, brand, pack size, price) for the three preview searches in `src/data/ads.ts` ("chips", "diwali gift", "ragi chips") and save it as a data file. No live calls from the app.
-- Real brand names are fine for the **organic** results. **Sponsored ads stay fictional**: invented brands, bids, click rates and relevance.
-- Label the page "catalogue snapshot" next to the existing "simulated" note.
-- Use search/read tools only. Never call cart, checkout or order tools.
+- Shopper preview organic results are real products from a one-time catalogue snapshot (`src/data/catalogueSnapshot.ts`, 14 Oct 2026, first ten non-promoted results per search). No live calls from the app. Real brand names are allowed there only; sponsored ads stay fictional (brands, bids, click rates, relevance). Organic relevance values are illustrative. The page says "catalogue snapshot" next to the "simulated" note.
 
 ## Commands
 
