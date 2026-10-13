@@ -301,9 +301,14 @@ src/
 
 ## Design direction
 
-- Calm B2B tool: neutral surface, one accent colour, dense but legible. Not a marketing page.
+- Warm orange brand on warm neutrals, framed by a deep ink sidebar and a slim top bar. Tokens live in `src/index.css`; never hard-code colours in components.
+- Light and dark themes (toggle in the top bar, `.dark` on `<html>`). Any new colour needs both.
+- One hue per campaign goal (`--goal-*`); show a goal with `GoalTag`, and tint goal-specific charts and bars with it.
+- Top bar owns the global Create menu, the Brand/Internal switch and the balance. Pages don't repeat a primary Create button.
+- Motion is purposeful only: `.pressable` on selectable cards, `.bar-fill` on bars, `.rise-in` between wizard steps, `AnimatedNumber` where a control changes a figure, a brief "Fixed" note when an issue is resolved. Respect reduced motion.
+- Shared pieces in `src/shell/ui.tsx`: Panel, Stat, GoalTag, Thumb, BannerArt, Bar, AnimatedNumber.
 - Sponsored cards match organic cards except a clear "Sponsored" label.
-- Sentence case. Indian number formatting (₹1,00,000; lakh for large reach numbers).
+- Sentence case. Indian number formatting (₹1,00,000; lakh for large reach numbers). Font: Inter (user's choice).
 - Every simulated number is labelled "simulated" once per page.
 
 ## Build order and cut line

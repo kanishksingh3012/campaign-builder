@@ -34,7 +34,7 @@ function sectionOf(issue: Issue): string {
 
 function Card({ id, title, hint, children }: { id: string; title: string; hint?: string; children: ReactNode }) {
   return (
-    <section id={id} className="scroll-mt-6 rounded-2xl border border-border bg-surface p-5">
+    <section id={id} className="scroll-mt-6 rounded-2xl border border-border bg-surface p-5 shadow-card">
       <h2 className="text-sm font-semibold">{title}</h2>
       {hint && <p className="mt-0.5 text-sm text-muted">{hint}</p>}
       <div className="mt-4">{children}</div>
@@ -343,7 +343,7 @@ export function CustomBuilder() {
           </div>
         </div>
 
-        <aside className="sticky top-6 rounded-2xl border border-border bg-surface p-4 text-sm" aria-label="Summary">
+        <aside className="sticky top-6 rounded-2xl border border-border bg-surface p-4 text-sm shadow-card" aria-label="Summary">
           <nav aria-label="Sections" className="mb-3 flex flex-wrap gap-1.5">
             {SECTIONS.map((section) => (
               <a key={section.id} href={`#${section.id}`} className="rounded-full border border-border px-2.5 py-0.5 text-xs text-muted hover:bg-surface-secondary">

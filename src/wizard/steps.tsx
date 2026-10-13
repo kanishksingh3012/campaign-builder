@@ -9,6 +9,7 @@ import { audienceSize, estimate } from '../lib/estimate'
 import { count, daysBetween, inr, range } from '../lib/format'
 import type { Creative, Draft, GoalId, Issue, WizardStep } from '../lib/types'
 import { recommendedSplit, splitTotal } from '../lib/validate'
+import { BannerArt, GOAL_ICON, goalStyle } from '../shell/ui'
 import { IssueList } from './IssueNote'
 
 export interface StepProps {
@@ -21,7 +22,7 @@ const forField = (issues: Issue[], prefix: string) => issues.filter((i) => i.fie
 
 function Section({ title, hint, aside, children }: { title: string; hint?: string; aside?: ReactNode; children: ReactNode }) {
   return (
-    <section className="rounded-2xl border border-border bg-surface p-5">
+    <section className="rounded-2xl border border-border bg-surface p-5 shadow-card">
       <div className="mb-4 flex items-start justify-between gap-4">
         <div>
           <h2 className="text-sm font-semibold">{title}</h2>
@@ -59,21 +60,28 @@ export function GoalStep({ draft, update, creatives }: StepProps & { creatives: 
       <div role="radiogroup" aria-label="Campaign goal" className="grid grid-cols-3 gap-3">
         {GOAL_LIST.map((goal) => {
           const selected = draft.goal === goal.id
+          const Icon = GOAL_ICON[goal.id]
           return (
             <button
               key={goal.id}
               type="button"
               role="radio"
               aria-checked={selected}
+              style={goalStyle(goal.id)}
               onClick={() => update((d) => chooseGoal(d, goal.id, creatives))}
-              className={`flex flex-col rounded-xl border p-4 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus ${
-                selected ? 'border-accent bg-accent-soft' : 'border-border hover:bg-surface-secondary'
-              }`}
+              className={`pressable flex flex-col rounded-xl border p-4 text-left ${selected ? 'goal-ring' : 'border-border bg-surface'}`}
             >
-              <span className="flex items-center justify-between text-sm font-semibold">
-                {goal.name}
-                {selected && <Check size={16} className="text-accent" />}
+              <span className="flex items-start justify-between">
+                <span className={`grid size-9 place-items-center rounded-lg ${selected ? 'goal-solid' : 'goal-soft'}`}>
+                  <Icon size={18} strokeWidth={1.75} />
+                </span>
+                {selected && (
+                  <span className="goal-solid pop-in grid size-5 place-items-center rounded-full">
+                    <Check size={12} strokeWidth={3} />
+                  </span>
+                )}
               </span>
+              <span className="mt-3 text-base font-semibold">{goal.name}</span>
               <span className="mt-1 text-sm text-muted">{goal.promise}</span>
               <dl className="mt-4 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs">
                 <dt className="text-muted">Judged on</dt>
@@ -113,7 +121,7 @@ export function CreativePicker({ draft, issues, update, creatives }: StepProps &
                 selected ? 'border-accent bg-accent-soft' : 'border-border hover:bg-surface-secondary'
               }`}
             >
-              <span className="mb-2 block h-14 rounded-lg bg-default" aria-hidden />
+              <BannerArt name={creative.name} className="mb-2 h-16" />
               <span className="block font-medium">{creative.name}</span>
               <span className={`text-xs ${creative.status === 'rejected' ? 'text-danger' : 'text-muted'}`}>
                 {creative.status === 'approved' ? 'Approved' : creative.status === 'in_review' ? 'In review' : 'Rejected'}

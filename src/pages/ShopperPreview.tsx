@@ -1,11 +1,11 @@
-import { Button, Chip, Popover, Slider } from '@heroui/react'
+import { Button, Chip, Popover, Slider, Switch } from '@heroui/react'
 import { Search } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type ReactNode } from 'react'
 import { SCENARIOS } from '../data/ads'
 import { CONVERSION_GUARDRAIL, runAuction, verdict, type AuctionSettings, type RankedAd } from '../lib/auction'
 import { inr, percent } from '../lib/format'
 import { PageHeader } from '../shell/Layout'
-import { Panel, SimulatedNote } from '../shell/ui'
+import { AnimatedNumber, Panel, SimulatedNote, Thumb } from '../shell/ui'
 
 /** The setup every change is compared against. */
 const DEFAULT_SETTINGS: AuctionSettings = { slots: 2, relevanceFloor: 0.5 }
@@ -13,6 +13,7 @@ const DEFAULT_SETTINGS: AuctionSettings = { slots: 2, relevanceFloor: 0.5 }
 export function ShopperPreview() {
   const [scenarioId, setScenarioId] = useState(SCENARIOS[0].id)
   const [settings, setSettings] = useState(DEFAULT_SETTINGS)
+  const [highlight, setHighlight] = useState(false)
   const scenario = SCENARIOS.find((s) => s.id === scenarioId)!
   const result = useMemo(() => runAuction(scenario, settings), [scenario, settings])
   const baseline = useMemo(() => runAuction(scenario, DEFAULT_SETTINGS), [scenario])
@@ -23,7 +24,17 @@ export function ShopperPreview() {
     <>
       <PageHeader title="Shopper preview" subtitle="What a shopper sees for a search, and what each ad setting costs them." />
       <div className="grid grid-cols-[22rem_1fr] items-start gap-5">
-        <div className="rounded-[2rem] border border-border bg-surface p-3">
+        <div>
+          <div className="mb-3 flex items-center justify-between text-sm">
+            <span className="text-muted">{result.winners.length} of {result.page.length} results are ads</span>
+            <Switch isSelected={highlight} onChange={setHighlight} className="flex-row items-center gap-2">
+              <Switch.Control>
+                <Switch.Thumb />
+              </Switch.Control>
+              <span>Highlight ads</span>
+            </Switch>
+          </div>
+          <div className="rounded-[2.25rem] border-[7px] border-ink bg-surface p-3 shadow-lift">
           <div className="mb-3 flex items-center gap-2 rounded-full bg-default px-3.5 py-2 text-sm">
             <Search size={15} className="text-muted" />
             {scenario.query}
@@ -32,8 +43,13 @@ export function ShopperPreview() {
             {result.page.map((item) => {
               const card = item.kind === 'sponsored' ? item.ad : item.result
               return (
-                <li key={`${item.kind}-${card.id}`} className="flex flex-col rounded-xl border border-border p-2.5 text-sm">
-                  <span className="mb-2 block h-16 rounded-lg bg-default" aria-hidden />
+                <li
+                  key={`${item.kind}-${card.id}`}
+                  className={`flex flex-col rounded-xl border p-2.5 text-sm transition-colors ${
+                    item.kind === 'sponsored' ? `pop-in ${highlight ? 'border-accent bg-accent-soft' : 'border-border'}` : `border-border ${highlight ? 'opacity-55' : ''}`
+                  }`}
+                >
+                  <Thumb seed={card.brand} className="mb-2 h-16" />
                   <span className="flex min-h-5 items-center justify-between gap-1">
                     <span className="truncate text-xs text-muted">{card.brand}</span>
                     {item.kind === 'sponsored' && <WhyThisAd ad={item.ad} eligible={result.eligible.length} />}
@@ -47,6 +63,7 @@ export function ShopperPreview() {
               )
             })}
           </ul>
+          </div>
         </div>
 
         <div className="flex flex-col gap-4">
@@ -59,7 +76,7 @@ export function ShopperPreview() {
                   role="radio"
                   aria-checked={s.id === scenarioId}
                   onClick={() => setScenarioId(s.id)}
-                  className={`rounded-full border px-3 py-1 text-sm transition-colors ${
+                  className={`rounded-full border px-3 py-1 text-sm transition-colors active:scale-[0.97] ${
                     s.id === scenarioId ? 'border-accent bg-accent-soft text-accent-soft-foreground' : 'border-border text-muted hover:bg-surface-secondary'
                   }`}
                 >
@@ -93,14 +110,14 @@ export function ShopperPreview() {
             }
           >
             <dl className="grid grid-cols-4 gap-4">
-              <Readout label="Revenue per 1,000 searches" value={inr(result.revenuePer1000)} />
-              <Readout label="Fill rate" value={percent(result.fillRate)} note={`${result.winners.length} of ${settings.slots} slots`} />
+              <Readout label="Revenue per 1,000 searches" value={<AnimatedNumber value={result.revenuePer1000} format={inr} />} />
+              <Readout label="Fill rate" value={<AnimatedNumber value={result.fillRate} format={(v) => percent(v)} />} note={`${result.winners.length} of ${settings.slots} slots`} />
               <Readout
                 label="Sponsored vs organic click rate"
                 value={result.winners.length ? `${ctrGap >= 0 ? '+' : '−'}${Math.abs(Math.round(ctrGap * 100))}%` : '—'}
                 note={result.winners.length ? `${percent(result.sponsoredCtr, 1)} vs ${percent(result.organicCtr, 1)}` : 'No ads shown'}
               />
-              <Readout label="Search conversion" value={percent(result.conversion, 1)} note={`${Math.round(result.conversionChange * 100)}% vs no ads`} />
+              <Readout label="Search conversion" value={<AnimatedNumber value={result.conversion} format={(v) => percent(v, 1)} />} note={`${Math.round(result.conversionChange * 100)}% vs no ads`} />
             </dl>
             <p className="mt-4 rounded-xl bg-default px-3 py-2 text-sm">
               <span className="font-medium">{verdict(result, baseline)}.</span>{' '}
@@ -220,7 +237,7 @@ function Control({
   )
 }
 
-function Readout({ label, value, note }: { label: string; value: string; note?: string }) {
+function Readout({ label, value, note }: { label: string; value: ReactNode; note?: string }) {
   return (
     <div>
       <dt className="text-xs text-muted">{label}</dt>

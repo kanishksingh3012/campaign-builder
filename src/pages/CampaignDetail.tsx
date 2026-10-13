@@ -9,10 +9,10 @@ import { alertFor } from '../lib/alerts'
 import { bundleOf } from '../lib/bundle'
 import { count, inr, percent } from '../lib/format'
 import { dailySpend, keywordPerformance, performance, timeElapsed } from '../lib/simulate'
-import type { Campaign } from '../lib/types'
+import type { Campaign, GoalId } from '../lib/types'
 import { PageHeader } from '../shell/Layout'
 import { StatusChip } from '../shell/StatusChip'
-import { AddBudgetMenu, Panel, SimulatedNote, Stat } from '../shell/ui'
+import { AddBudgetMenu, GoalTag, Panel, SimulatedNote, Stat } from '../shell/ui'
 import { useStore } from '../state/store'
 
 const DAY = new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short' })
@@ -65,9 +65,10 @@ export function CampaignDetail() {
           <div className="flex items-center gap-3">
             <h1 className="text-xl font-semibold tracking-tight">{campaign.name}</h1>
             <StatusChip status={campaign.status} />
+            <GoalTag goal={campaign.goal} />
           </div>
           <p className="tabular mt-1 text-sm text-muted">
-            {goal.name} · {day(campaign.startDate)} – {day(campaign.endDate)} · {inr(campaign.spent)} of {inr(campaign.budget)} spent ({percent(used)}) · {pacing}
+            {day(campaign.startDate)} – {day(campaign.endDate)} · {inr(campaign.spent)} of {inr(campaign.budget)} spent ({percent(used)}) · {pacing}
           </p>
         </div>
         <div className="flex shrink-0 gap-2">
@@ -155,13 +156,14 @@ export function CampaignDetail() {
                           labelFormatter={(label) => day(String(label))}
                           contentStyle={{ borderRadius: 12, border: '1px solid var(--color-border)', background: 'var(--color-surface)', fontSize: 13 }}
                         />
-                        <Area isAnimationActive={false} type="monotone" dataKey="spend" stroke="var(--color-accent)" strokeWidth={2} fill="var(--color-accent)" fillOpacity={0.12} />
+                        <Area isAnimationActive={false} type="monotone" dataKey="spend" stroke={`var(--goal-${campaign.goal})`} strokeWidth={2} fill={`var(--goal-${campaign.goal})`} fillOpacity={0.14} />
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
                 </Panel>
                 <Panel title="Funnel">
                   <Funnel
+                    goal={campaign.goal}
                     steps={[
                       { label: 'Impressions', value: perf.impressions },
                       { label: 'Clicks', value: perf.clicks },
@@ -299,7 +301,7 @@ export function CampaignDetail() {
   )
 }
 
-function Funnel({ steps }: { steps: { label: string; value: number }[] }) {
+function Funnel({ steps, goal }: { steps: { label: string; value: number }[]; goal: GoalId }) {
   const top = steps[0].value || 1
   return (
     <ol className="flex flex-col gap-3 text-sm">
@@ -314,7 +316,7 @@ function Funnel({ steps }: { steps: { label: string; value: number }[] }) {
           </div>
           {/* Square-root scale so the small late steps stay visible next to impressions. */}
           <div className="h-2 rounded-full bg-default">
-            <div className="h-2 rounded-full bg-accent" style={{ width: `${Math.max(2, Math.sqrt(step.value / top) * 100)}%` }} />
+            <div className="bar-fill h-2 rounded-full" style={{ background: `var(--goal-${goal})`, width: `${Math.max(2, Math.sqrt(step.value / top) * 100)}%` }} />
           </div>
         </li>
       ))}

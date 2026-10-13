@@ -2,14 +2,15 @@ import { Button, Chip, Tabs } from '@heroui/react'
 import { Download } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
-import { GOAL_LIST, GOALS } from '../data/goals'
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { FORMATS, GOAL_LIST, GOALS } from '../data/goals'
 import { STATUS_LABEL } from '../lib/alerts'
 import { count, inr } from '../lib/format'
-import { performance } from '../lib/simulate'
-import type { Creative, GoalId } from '../lib/types'
+import { performance, spendByDay } from '../lib/simulate'
+import type { Creative, FormatId, GoalId } from '../lib/types'
 import { PageHeader } from '../shell/Layout'
 import { StatusChip } from '../shell/StatusChip'
-import { AddBudgetMenu, Panel, SimulatedNote, Stat } from '../shell/ui'
+import { AddBudgetMenu, BannerArt, GoalTag, Panel, SimulatedNote, Stat } from '../shell/ui'
 import { useStore } from '../state/store'
 
 const CREATIVE_STATUS: Record<Creative['status'], { label: string; color: 'success' | 'accent' | 'danger' }> = {
@@ -44,10 +45,8 @@ export function Creatives() {
           const usedIn = campaigns.filter((c) => c.creativeId === creative.id)
           const status = CREATIVE_STATUS[creative.status]
           return (
-            <li key={creative.id} className="flex flex-col rounded-2xl border border-border bg-surface p-4 text-sm">
-              <div className="mb-3 grid h-28 place-items-center rounded-xl bg-default text-xs text-muted" aria-hidden>
-                Banner preview
-              </div>
+            <li key={creative.id} className="flex flex-col rounded-2xl border border-border bg-surface p-4 text-sm shadow-card">
+              <BannerArt name={creative.name} className="mb-3 h-28" />
               <div className="flex items-start justify-between gap-2">
                 <span className="font-medium">{creative.name}</span>
                 <Chip size="sm" variant="soft" color={status.color} className="whitespace-nowrap">
@@ -74,6 +73,9 @@ export function Creatives() {
   )
 }
 
+const DAY = new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short' })
+const day = (date: string) => DAY.format(new Date(date))
+
 export function Reports() {
   const { campaigns } = useStore()
   const [goalId, setGoalId] = useState<GoalId>('new_customers')
@@ -81,6 +83,20 @@ export function Reports() {
   const rows = campaigns.filter((c) => c.goal === goalId && c.spent > 0).map((campaign) => ({ campaign, perf: performance(campaign) }))
   const unit = goalId === 'awareness' ? 1000 : 1
   const costLabel = goalId === 'awareness' ? 'Cost per 1,000 reached' : `Cost per ${goalId === 'new_customers' ? 'new customer' : goalId === 'win_back' ? 'returning customer' : 'order'}`
+
+  const trend = spendByDay(rows.map((r) => r.campaign), 21)
+  const formatTotals = new Map<FormatId, { format: FormatId; spend: number; orders: number }>()
+  for (const { perf } of rows) {
+    for (const row of perf.byFormat) {
+      const total = formatTotals.get(row.format) ?? { format: row.format, spend: 0, orders: 0 }
+      formatTotals.set(row.format, { format: row.format, spend: total.spend + row.spend, orders: total.orders + row.orders })
+    }
+  }
+  const byFormat = [...formatTotals.values()].sort((a, b) => b.spend - a.spend)
+  const maxFormatSpend = Math.max(1, ...byFormat.map((row) => row.spend))
+  const costs = rows.filter((r) => r.perf.headline > 0).map((r) => ({ name: r.campaign.name, cost: (r.perf.spend / r.perf.headline) * unit }))
+  const maxCost = Math.max(1, ...costs.map((row) => row.cost))
+  const bestCost = Math.min(...costs.map((row) => row.cost))
 
   function exportCsv() {
     const header = ['Campaign', 'Status', 'Spend', 'Impressions', 'Clicks', 'Orders', goal.headlineMetric, costLabel, 'Sales', 'ROAS']
@@ -110,13 +126,72 @@ export function Reports() {
           <Tabs.List aria-label="Goal">
             {[...GOAL_LIST, GOALS.custom].map((g) => (
               <Tabs.Tab key={g.id} id={g.id} className="whitespace-nowrap">
-                {g.name}
+                <GoalTag goal={g.id} />
                 <Tabs.Indicator />
               </Tabs.Tab>
             ))}
           </Tabs.List>
         </Tabs.ListContainer>
       </Tabs>
+      {rows.length > 0 && (
+        <div className="mb-4 grid grid-cols-3 gap-4">
+          <Panel title="Daily spend" hint="Last 21 days" className="col-span-1">
+            <div className="h-44">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={trend} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
+                  <CartesianGrid vertical={false} stroke="var(--color-border)" />
+                  <XAxis dataKey="date" tickFormatter={day} tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: 'var(--color-muted)' }} minTickGap={28} />
+                  <YAxis tickFormatter={(v: number) => `₹${v / 1000}k`} tickLine={false} axisLine={false} width={44} tick={{ fontSize: 12, fill: 'var(--color-muted)' }} />
+                  <Tooltip
+                    formatter={(value) => [inr(Number(value)), 'Spend']}
+                    labelFormatter={(label) => day(String(label))}
+                    contentStyle={{ borderRadius: 12, border: '1px solid var(--color-border)', background: 'var(--color-surface)', fontSize: 13 }}
+                  />
+                  <Area isAnimationActive={false} type="monotone" dataKey={goalId} stroke={`var(--goal-${goalId})`} strokeWidth={2} fill={`var(--goal-${goalId})`} fillOpacity={0.14} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </Panel>
+
+          <Panel title="Where the money went" hint="Spend and orders by ad format">
+            <ul className="flex flex-col gap-3 text-sm">
+              {byFormat.map((row) => (
+                <li key={row.format}>
+                  <div className="tabular mb-1 flex items-baseline justify-between">
+                    <span className="font-medium">{FORMATS[row.format].name}</span>
+                    <span className="text-muted">
+                      {inr(row.spend)} · {count(row.orders)} orders
+                    </span>
+                  </div>
+                  <span className="block h-2 overflow-hidden rounded-full bg-default">
+                    <span className="bar-fill block h-full rounded-full" style={{ width: `${(row.spend / maxFormatSpend) * 100}%`, background: `var(--goal-${goalId})` }} />
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </Panel>
+
+          <Panel title={costLabel} hint="By campaign. Shorter is better.">
+            <ul className="flex flex-col gap-3 text-sm">
+              {costs.map((row) => (
+                <li key={row.name}>
+                  <div className="tabular mb-1 flex items-baseline justify-between gap-3">
+                    <span className="truncate font-medium">{row.name}</span>
+                    <span className={row.cost === bestCost ? 'font-medium text-success' : 'text-muted'}>
+                      {inr(row.cost)}
+                      {row.cost === bestCost && costs.length > 1 && ' · best'}
+                    </span>
+                  </div>
+                  <span className="block h-2 overflow-hidden rounded-full bg-default">
+                    <span className={`bar-fill block h-full rounded-full ${row.cost === bestCost ? 'bg-success' : 'bg-muted'}`} style={{ width: `${(row.cost / maxCost) * 100}%` }} />
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </Panel>
+        </div>
+      )}
+
       <Panel title={`${goal.name}: ${goal.judgedOn.toLowerCase()}`} hint="Orders are attributed to an ad for 7 days after a click.">
         {rows.length === 0 ? (
           <p className="py-8 text-center text-sm text-muted">No {goal.name.toLowerCase()} campaign has spent yet.</p>

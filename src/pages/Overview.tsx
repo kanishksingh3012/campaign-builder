@@ -1,15 +1,21 @@
-import { Button, ProgressBar } from '@heroui/react'
+import { Button } from '@heroui/react'
 import { AlertTriangle, Check, OctagonAlert, Plus } from 'lucide-react'
 import { Link, useNavigate } from 'react-router'
+import { Bar as RechartsBar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { BRAND } from '../data/catalogue'
 import { GOALS } from '../data/goals'
 import { alertFor } from '../lib/alerts'
 import { count, inr, percent } from '../lib/format'
-import { performance, timeElapsed, totals } from '../lib/simulate'
+import { performance, spendByDay, timeElapsed, totals } from '../lib/simulate'
+import type { GoalId } from '../lib/types'
 import { PageHeader } from '../shell/Layout'
 import { StatusChip } from '../shell/StatusChip'
-import { AddBudgetMenu, Panel, SimulatedNote, Stat } from '../shell/ui'
+import { AddBudgetMenu, Bar, GoalTag, Panel, SimulatedNote } from '../shell/ui'
 import { useStore } from '../state/store'
+
+const GOAL_ORDER: GoalId[] = ['awareness', 'new_customers', 'win_back', 'custom']
+const DAY = new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short' })
+const day = (date: string) => DAY.format(new Date(date))
 
 export function Overview() {
   const navigate = useNavigate()
@@ -55,23 +61,59 @@ export function Overview() {
 
   return (
     <>
-      <PageHeader
-        title="Overview"
-        subtitle={`${BRAND} · all campaigns to date`}
-        actions={
-          <Button variant="primary" onPress={() => navigate('/campaigns/new')}>
-            <Plus size={16} />
-            Create campaign
-          </Button>
-        }
-      />
+      <PageHeader title="Overview" subtitle={`${BRAND} · last 14 days of spend, all campaigns to date`} />
 
-      <div className="mb-4 grid grid-cols-4 gap-4">
-        <Stat label="Spend" value={inr(sum.spend)} note={`${inr(committed)} still committed`} />
-        <Stat label="Sales from ads" value={inr(sum.sales)} note={`${count(sum.orders)} orders`} />
-        <Stat label="Return on ad spend" value={`${sum.roas.toFixed(2)}×`} />
-        <Stat label="New customers" value={count(sum.newCustomers)} note="From new-customer campaigns" />
-      </div>
+      <Panel className="mb-4">
+        <div className="grid grid-cols-[1fr_17rem] gap-8">
+          <div>
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-sm font-semibold">Daily spend by goal</h2>
+              <ul className="flex gap-3 text-xs">
+                {GOAL_ORDER.map((goal) => (
+                  <li key={goal} className="flex items-center gap-1.5 text-muted">
+                    <span className="size-2 rounded-full" style={{ background: `var(--goal-${goal})` }} />
+                    {GOALS[goal].name}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="h-52">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={spendByDay(campaigns)} margin={{ top: 4, right: 0, bottom: 0, left: 0 }} barCategoryGap="22%">
+                  <CartesianGrid vertical={false} stroke="var(--color-border)" />
+                  <XAxis dataKey="date" tickFormatter={day} tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: 'var(--color-muted)' }} minTickGap={20} />
+                  <YAxis tickFormatter={(v: number) => `₹${v / 1000}k`} tickLine={false} axisLine={false} width={48} tick={{ fontSize: 12, fill: 'var(--color-muted)' }} />
+                  <Tooltip
+                    cursor={{ fill: 'var(--color-default)' }}
+                    formatter={(value, name) => [inr(Number(value)), GOALS[name as GoalId].name]}
+                    labelFormatter={(label) => day(String(label))}
+                    contentStyle={{ borderRadius: 12, border: '1px solid var(--color-border)', background: 'var(--color-surface)', fontSize: 13 }}
+                  />
+                  {GOAL_ORDER.map((goal, i) => (
+                    <RechartsBar isAnimationActive={false} key={goal} dataKey={goal} stackId="spend" fill={`var(--goal-${goal})`} radius={i === GOAL_ORDER.length - 1 ? [4, 4, 0, 0] : 0} />
+                  ))}
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+          <dl className="tabular flex flex-col justify-between border-l border-border pl-8">
+            {[
+              ['Spend', inr(sum.spend), `${inr(committed)} still committed`],
+              ['Sales from ads', inr(sum.sales), `${count(sum.orders)} orders`],
+              ['Return on ad spend', `${sum.roas.toFixed(2)}×`, 'Sales ÷ spend'],
+              ['New customers', count(sum.newCustomers), 'From new-customer campaigns'],
+            ].map(([label, value, note]) => (
+              <div key={label} className="flex items-baseline justify-between gap-4">
+                <dt className="text-sm text-muted">
+                  {label}
+                  <span className="block text-xs">{note}</span>
+                </dt>
+                <dd className="text-lg font-semibold tracking-tight">{value}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </Panel>
 
       <div className="grid grid-cols-[1fr_20rem] items-start gap-4">
         <div className="flex flex-col gap-4">
@@ -139,7 +181,9 @@ export function Overview() {
                         <Link to={`/campaigns/${campaign.id}`} className="font-medium hover:underline">
                           {campaign.name}
                         </Link>
-                        <span className="block text-xs text-muted">{goal.name}</span>
+                        <span className="mt-1 block">
+                          <GoalTag goal={campaign.goal} />
+                        </span>
                       </td>
                       <td className="px-3 py-2.5">
                         <StatusChip status={campaign.status} />
@@ -149,11 +193,7 @@ export function Overview() {
                         <span className="block text-xs text-muted">{goal.headlineMetric.toLowerCase()}</span>
                       </td>
                       <td className="py-2.5 pl-3">
-                        <ProgressBar aria-label={`${campaign.name} budget used`} value={used * 100} size="sm" color={campaign.status === 'out_of_budget' ? 'danger' : 'accent'}>
-                          <ProgressBar.Track>
-                            <ProgressBar.Fill />
-                          </ProgressBar.Track>
-                        </ProgressBar>
+                        <Bar value={used * 100} tone={campaign.status === 'out_of_budget' ? 'danger' : 'accent'} />
                         <p className="tabular mt-1 text-xs text-muted">
                           {percent(used)} of budget · {percent(timeElapsed(campaign))} of time
                         </p>

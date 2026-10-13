@@ -180,7 +180,7 @@ export function Wizard() {
       </ol>
 
       <div className="grid grid-cols-[1fr_17rem] items-start gap-5">
-        <div className="min-w-0">
+        <div key={step} className="rise-in min-w-0">
           {step === 'goal' && <GoalStep {...stepProps} creatives={creatives} />}
           {step === 'bundle' && goal && <BundleStep {...stepProps} creatives={creatives} />}
           {step === 'products' && goal && <ProductsStep {...stepProps} />}
@@ -190,7 +190,7 @@ export function Wizard() {
           )}
         </div>
 
-        <aside className="sticky top-6 rounded-2xl border border-border bg-surface p-4 text-sm" aria-label="Summary">
+        <aside className="sticky top-6 rounded-2xl border border-border bg-surface p-4 text-sm shadow-card" aria-label="Summary">
           <h2 className="font-semibold">Summary</h2>
           <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
             <dt className="text-muted">Goal</dt>

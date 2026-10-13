@@ -1,13 +1,13 @@
-import { Button, Dropdown, Label, ProgressBar, SearchField, Tabs, Tooltip } from '@heroui/react'
+import { Button, Dropdown, Label, SearchField, Tabs, Tooltip } from '@heroui/react'
 import { AlertTriangle, MoreHorizontal, OctagonAlert, Plus } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
-import { GOALS } from '../data/goals'
 import { alertFor } from '../lib/alerts'
 import { inr } from '../lib/format'
 import type { Campaign, CampaignStatus } from '../lib/types'
 import { PageHeader } from '../shell/Layout'
 import { StatusChip } from '../shell/StatusChip'
+import { Bar, GoalTag } from '../shell/ui'
 import { useStore } from '../state/store'
 
 type Filter = 'all' | 'live' | 'attention' | 'in_review' | 'paused' | 'draft' | 'ended'
@@ -73,7 +73,7 @@ export function Campaigns() {
 
   return (
     <>
-      <PageHeader title="Campaigns" subtitle={`${campaigns.length} campaigns`} actions={createButton} />
+      <PageHeader title="Campaigns" subtitle={`${campaigns.length} campaigns across ${new Set(campaigns.map((c) => c.goal)).size} goals`} />
 
       <div className="mb-3 flex items-center justify-between gap-4">
         <Tabs selectedKey={filter} onSelectionChange={(key) => setFilter(key as Filter)}>
@@ -98,7 +98,7 @@ export function Campaigns() {
         </SearchField>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-border bg-surface">
+      <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-card">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border text-left text-xs font-medium text-muted">
@@ -117,7 +117,7 @@ export function Campaigns() {
               const alert = alertFor(campaign)
               const used = campaign.budget ? campaign.spent / campaign.budget : 0
               return (
-                <tr key={campaign.id} className="border-b border-border last:border-0 hover:bg-surface-secondary">
+                <tr key={campaign.id} className="border-b border-border transition-colors last:border-0 hover:bg-surface-secondary">
                   <td className="px-4 py-3">
                     <Link
                       to={campaign.status === 'draft' ? `/campaigns/${campaign.id}/edit` : `/campaigns/${campaign.id}`}
@@ -133,7 +133,9 @@ export function Campaigns() {
                       </p>
                     )}
                   </td>
-                  <td className="px-3 py-3 text-muted">{GOALS[campaign.goal].name}</td>
+                  <td className="px-3 py-3">
+                    <GoalTag goal={campaign.goal} />
+                  </td>
                   <td className="px-3 py-3">
                     <StatusChip status={campaign.status} />
                   </td>
@@ -141,16 +143,7 @@ export function Campaigns() {
                     {DATE.format(new Date(campaign.startDate))} – {DATE.format(new Date(campaign.endDate))}
                   </td>
                   <td className="px-3 py-3">
-                    <ProgressBar
-                      aria-label={`${campaign.name} budget used`}
-                      value={used * 100}
-                      size="sm"
-                      color={campaign.status === 'out_of_budget' ? 'danger' : 'accent'}
-                    >
-                      <ProgressBar.Track>
-                        <ProgressBar.Fill />
-                      </ProgressBar.Track>
-                    </ProgressBar>
+                    <Bar value={used * 100} tone={campaign.status === 'out_of_budget' ? 'danger' : 'accent'} />
                     <p className="tabular mt-1 text-xs text-muted">
                       {inr(campaign.spent)} of {inr(campaign.budget)}
                     </p>

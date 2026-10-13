@@ -4,7 +4,7 @@ import { FORMATS } from '../data/goals'
 import { bundleOf } from './bundle'
 import { ORDER_RATE } from './estimate'
 import { daysBetween } from './format'
-import type { Campaign, FormatId } from './types'
+import type { Campaign, FormatId, GoalId } from './types'
 import { addDays } from './validate'
 
 // Turns a campaign's spend into plausible performance numbers. Deterministic, so the demo looks the same every load.
@@ -121,4 +121,22 @@ export function keywordPerformance(campaign: Campaign): KeywordPerformance[] {
     const orderRate = 0.08 + 0.22 * noise(keyword, i)
     return { keyword, spend: Math.round(spend * share), clicks: keywordClicks, orders: Math.round(keywordClicks * orderRate) }
   })
+}
+
+export type DaySpend = { date: string } & Record<GoalId, number>
+
+/** Spend per day for the last `days` days, split by goal, for the overview chart. */
+export function spendByDay(campaigns: Campaign[], days = 14): DaySpend[] {
+  const rows = new Map<string, DaySpend>()
+  for (let i = days - 1; i >= 0; i--) {
+    const date = addDays(TODAY, -i)
+    rows.set(date, { date, awareness: 0, new_customers: 0, win_back: 0, custom: 0 })
+  }
+  for (const campaign of campaigns) {
+    for (const day of dailySpend(campaign)) {
+      const row = rows.get(day.date)
+      if (row) row[campaign.goal] += day.spend
+    }
+  }
+  return [...rows.values()]
 }

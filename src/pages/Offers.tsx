@@ -1,4 +1,4 @@
-import { Button, Checkbox, Chip, Input, ProgressBar } from '@heroui/react'
+import { Button, Checkbox, Chip, Input } from '@heroui/react'
 import { AlertTriangle, ArrowLeft, Check, OctagonAlert, Plus, Zap } from 'lucide-react'
 import { useMemo, useState, type ReactNode } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
@@ -21,7 +21,7 @@ import {
   type OfferTemplate,
 } from '../lib/offers'
 import { PageHeader } from '../shell/Layout'
-import { Panel, SimulatedNote } from '../shell/ui'
+import { Bar, Panel, SimulatedNote, Thumb } from '../shell/ui'
 import { useStore } from '../state/store'
 import { IssueList } from '../wizard/IssueNote'
 
@@ -48,8 +48,8 @@ export function Offers() {
 
   return (
     <>
-      <PageHeader title="Offers" subtitle="Price offers you fund yourself. Set one up today and it's live today." actions={create} />
-      <div className="overflow-hidden rounded-2xl border border-border bg-surface">
+      <PageHeader title="Offers" subtitle="Price offers you fund yourself. Set one up today and it's live today." />
+      <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-card">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border text-left text-xs text-muted">
@@ -86,11 +86,7 @@ export function Offers() {
                   {day(offer.startDate)} – {day(offer.endDate)}
                 </td>
                 <td className="px-3 py-3">
-                  <ProgressBar aria-label={`${offer.name} budget used`} value={(offer.funded / offer.budgetCap) * 100} size="sm">
-                    <ProgressBar.Track>
-                      <ProgressBar.Fill />
-                    </ProgressBar.Track>
-                  </ProgressBar>
+                  <Bar value={(offer.funded / offer.budgetCap) * 100} />
                   <p className="tabular mt-1 text-xs text-muted">
                     {inr(offer.funded)} of {inr(offer.budgetCap)} cap
                   </p>
@@ -135,7 +131,7 @@ const OfferBadge = ({ children }: { children: ReactNode }) => (
 
 function Card({ title, hint, children }: { title: string; hint?: string; children: ReactNode }) {
   return (
-    <section className="rounded-2xl border border-border bg-surface p-5">
+    <section className="rounded-2xl border border-border bg-surface p-5 shadow-card">
       <h2 className="text-sm font-semibold">{title}</h2>
       {hint && <p className="mt-0.5 text-sm text-muted">{hint}</p>}
       <div className="mt-4">{children}</div>
@@ -211,7 +207,7 @@ export function OfferBuilder() {
                     role="radio"
                     aria-checked={selected}
                     onClick={() => set({ template })}
-                    className={`rounded-xl border p-3.5 text-left text-sm transition-colors ${selected ? 'border-accent bg-accent-soft' : 'border-border hover:bg-surface-secondary'}`}
+                    className={`pressable rounded-xl border p-3.5 text-left text-sm ${selected ? 'border-accent bg-accent-soft' : 'border-border hover:bg-surface-secondary'}`}
                   >
                     <span className="flex items-center justify-between font-semibold">
                       {TEMPLATES[template].name}
@@ -339,7 +335,7 @@ export function OfferBuilder() {
             ) : (
               <>
                 <div className="rounded-xl border border-border p-3 text-sm">
-                  <span className="mb-2 block h-20 rounded-lg bg-default" aria-hidden />
+                  <Thumb seed={items.map((p) => p.name).join()} className="mb-2 h-20" />
                   <OfferBadge>{offerLabel(offer)}</OfferBadge>
                   <p className="mt-1.5 text-xs text-muted">{BRAND}</p>
                   <p className="font-medium">{offer.template === 'bundle' ? items.map((p) => p.name).join(' + ') : items[0].name}</p>
